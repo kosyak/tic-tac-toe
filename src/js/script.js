@@ -11,7 +11,7 @@ $(document).ready(function () {
 	for(var i = 0; i<size; ++i) {
 		var $tr = $('<tr></tr>');
 		for(var j=0;j<size;++j) {
-			$('<td></td>').appendTo($tr);
+			$('<td></td>').text(' ').appendTo($tr);
 			}
 		$tr.appendTo($tbody);
 		}
