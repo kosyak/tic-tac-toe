@@ -17,8 +17,15 @@ class GamePage(webapp.RequestHandler):
         self.response.out.write(template.render(path, {}))
 
 
+class TestPage(webapp.RequestHandler):
+    def post(self):
+        print 'Content-Type: text/plain'
+        print ''
+        print self.request.get("content")
+        
 application = webapp.WSGIApplication([('/', MainPage),
-                                      (r'/[G,g]ame', GamePage)],
+                                      (r'/[G,g]ame', GamePage),
+                                      (r'/[T,t]est'), TestPage],
                                      debug=True)
 
 
