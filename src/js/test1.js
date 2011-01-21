@@ -12,7 +12,7 @@ $(document).ready(function() {
   });
   
   $('button').click(function () {
-    $.post('test', {data: 'POST'}, function(data) {
+    $.post('test', {data: $('input').val()}, function(data) {
       $('#result').append('<p>'+data+'</p>');
     });
   });

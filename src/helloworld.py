@@ -18,17 +18,18 @@ class GamePage(webapp.RequestHandler):
 
 
 class TestPage(webapp.RequestHandler):
-    def post(self):
-        print 'Content-Type: text/plain'
-        print ''
-        print self.request.cookies
-        print '='*80
-        print self.request.get("content")        
-        print '='*80
-        print "Post method done!"
     def get(self):
-        print 'Nothing doing for get method!'
-        
+        self.response.headers['Content-Type'] = 'text/html'
+        path = os.path.join(os.path.dirname(__file__), 'html/test.html')
+        self.response.out.write(template.render(path, {}))
+
+    def post(self):
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write(self.request.get('data'))
+        #path = os.path.join(os.path.dirname(__file__), 'html/game.html')
+        #self.response.out.write(template.render(path, {}))
+        #print 'POST'
+                
 application = webapp.WSGIApplication([('/', MainPage),
                                       (r'/[G,g]ame', GamePage),
                                       (r'/[T,t]est', TestPage)],
