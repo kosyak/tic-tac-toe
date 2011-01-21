@@ -21,7 +21,12 @@ class TestPage(webapp.RequestHandler):
     def post(self):
         print 'Content-Type: text/plain'
         print ''
-        print self.request.get("content")
+        print self.request.cookies
+        print '='*80
+        print self.request.get("content")        
+        print '='*80
+    def get(self):
+        print 'Nothing'
         
 application = webapp.WSGIApplication([('/', MainPage),
                                       (r'/[G,g]ame', GamePage),
