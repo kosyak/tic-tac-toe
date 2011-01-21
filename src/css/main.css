@@ -1,0 +1,18 @@
+@charset "utf-8";
+/* CSS Document */
+
+body {
+  font-size: 100%;
+}
+
+.login {
+  height: 100px;
+  position: absolute
+}
+
+input {
+  position: absolute 
+  font-family: "Lucida Console";
+  font-size: 2.5em;
+  height: 55px;
+}
