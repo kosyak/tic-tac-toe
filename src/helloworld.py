@@ -25,12 +25,13 @@ class TestPage(webapp.RequestHandler):
         print '='*80
         print self.request.get("content")        
         print '='*80
+        print "Post method done!"
     def get(self):
-        print 'Nothing'
+        print 'Nothing doing for get method!'
         
 application = webapp.WSGIApplication([('/', MainPage),
                                       (r'/[G,g]ame', GamePage),
-                                      (r'/[T,t]est'), TestPage],
+                                      (r'/[T,t]est', TestPage)],
                                      debug=True)
 
 
