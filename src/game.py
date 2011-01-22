@@ -10,7 +10,7 @@ import random
 def calcGameId(first_player_uid, second_player_uid): 
     return int((first_player_uid + second_player_uid) * random.random())
 
-size_of_game = 5
+SIZE_OF_BOARD = 5
 
 class TheGame:
     '''
@@ -24,7 +24,7 @@ class TheGame:
         self.turn = 0
         self.is_ended = False
         self.number_of_turns = 0
-        self.board = [[0] * size_of_game for i in range(0, size_of_game)]
+        self.board = [[None] * SIZE_OF_BOARD for i in range(0, SIZE_OF_BOARD)]
     
     def checkForEnd(self):
         self.is_ended = self.number_of_turns == 2

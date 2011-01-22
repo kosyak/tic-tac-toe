@@ -5,7 +5,9 @@ from google.appengine.ext.webapp import template
 from google.appengine.ext import db
 
 import game
+import player
 import random
+import time
 
 class MainPage(webapp.RequestHandler):
     def get(self):
@@ -23,30 +25,41 @@ class MainPage(webapp.RequestHandler):
         path = os.path.join(os.path.dirname(__file__), 'html/main.html')
         self.response.out.write(template.render(path, {}))
 
-def getUid(name):
-    res = 0
-    for ch in name:
-        res = res * 239 + ord(ch)
-        if res > 10**9 + 9:
-            res -= 10**9 + 9
-    return int(random.random() * res) 
 
-class GameStarterPage(webapp.RequestHandler):
-    def post(self):
-        players_names = self.request.get("content")
+def buildGame(players_names):
+        #players_names = self.request.get("content")
         first_name = players_names.split()[0]
         second_name = players_names.split()[1]
-        self.response.headers['Content-Type'] = 'text/html'
-        self.response.out.write('Making game for players ' + first_name + ' and ' + second_name)
-        curent_game = game.TheGame(getUid(first_name), getUid(second_name))
+        curent_game = game.TheGame(player.getUid(first_name),player.getUid(second_name))
         curent_game_record = game.GameRecord()
         curent_game_record.pack(curent_game)
         curent_game_record.put()
-        self.redirect('/game', True)
-    def get(self):
-        print 'Nothing!'
-        
+        #self.redirect('/game', True)
+
+class OnlineChecker(webapp.RequestHandler):
+    def post(self):
+        if self.request.get('online') != 0:
+            return
+        cur_uid = self.request.cookies.get('uid', None)
+        if cur_uid:
+            cur_query = db.GqlQuery("SELECT * FROM Player " + 
+                "WHERE record_of_uid = :1", cur_uid)
+            cur_player_record = cur_query.get()
+            if not cur_player_record:
+                return
+            cur_player_record.record_last_online = time.mktime(time.gmtime())
+            cur_player_record.put()
+            
+
 class GamePage(webapp.RequestHandler):
+    def post(self):
+        player_name = self.request.get('name')
+        cur_player = player.Player(player_name)
+        cur_record_player = player.PlayerRecord()
+        cur_record_player.pack(cur_player)
+        cur_record_player.put()
+        #make cookies
+        
     def get(self):
         games = db.GqlQuery("SELECT * FROM GameRecord")
         self.response.headers['Content-Type'] = 'text/plain'
@@ -78,9 +91,9 @@ class TestPage(webapp.RequestHandler):
 application = webapp.WSGIApplication([('/', MainPage),
                                       (r'/[G,g]ame', GamePage),
                                       (r'/[T,t]est', TestPage),
-                                      (r'/[G,g]amestart', GameStarterPage)
-                                      ],
-                                     debug=True)
+                                      ('/onlinechecker', OnlineChecker)],
+                                      ('gamestart', GameStarer)
+                                      debug=True)
 
 
 def main():
