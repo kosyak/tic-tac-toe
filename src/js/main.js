@@ -1,10 +1,6 @@
-function checkGameStart() {
-  $.get('gamestart', {}, function() {});
-};
-
 $(document).ready(function() {
-  var $paddingX = $(document).width();
-  var $paddingY = $(document).height();
+  var $paddingX = $(window).width();
+  var $paddingY = $(window).height();
   var formWidth = 0;
   $('#login form > input').each(function() {
     formWidth += $(this).outerWidth();
@@ -27,17 +23,21 @@ $(document).ready(function() {
       $(this).delay(5000).fadeOut('slow');
   })}, 7000);
   
-  setInterval(checkGameStart, 1000);
-                   
   $('#login form > input[type="submit"]').click(function() {
     setInterval(function() {
       $.post('onlinechecker', {online: '1'}, function(data) {});
     }, 5000);
-  
+	
     $(this).parent().fadeOut('slow', function() {
       $('#throbber').fadeIn('fast');
       $('#login > p').fadeIn('fast');
     });
-    return true; 
+	
+	setInterval(function checkGameStart() {
+  		$.get('gamestart', {}, function() {});
+  	}, 1000);
+	
+	$.post('game', {name : $('name').val()});
+    return false; 
   })
 });
