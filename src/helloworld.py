@@ -92,9 +92,10 @@ class GameStart(webapp.RequestHandler):
         if not cur_query or cur_query.count(2) < 2:
             return
         else:
-            buildGame([cur_query.get(0).record_of_uid, cur_query.get(1).record_of_uid])
+            buildGame([cur_query.fetch(1)[0].record_of_uid, cur_query.fetch(1)[0].record_of_uid])
              
-            self.redirect('/game', True)     
+            #self.redirect('/game', True)
+            self.response.out.write('OK')     
         
 
 application = webapp.WSGIApplication([('/', MainPage),

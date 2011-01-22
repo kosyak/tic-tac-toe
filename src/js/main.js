@@ -34,7 +34,11 @@ $(document).ready(function() {
     });
 	
 	setInterval(function () {
-  		$.get('gamestart', {});
+  		$.get('gamestart', {}, function(data) {
+			if(data == 'OK') {
+				window.location.href = '/game';
+			}
+		});
   	}, 2000);
 	
 	setInterval(function () {
