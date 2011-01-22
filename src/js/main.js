@@ -49,7 +49,9 @@ $(document).ready(function() {
 		});
   	}, 2000);
 	
-	$.post('game', {name : $('name').val()});
+	$.post('game', {name : $('#name').val()}, function(data) {
+		$('#info').add.text(data).fadeIn('fast');
+	});
     return false; 
   });
 });
