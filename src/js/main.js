@@ -37,6 +37,14 @@ $(document).ready(function() {
   		$.get('gamestart', {}, function() {});
   	}, 2000);
 	
+	setInterval(function checkGameStart() {
+  		$.get('test', {}, function(data) {
+			$('#info').text(data).fadeIn('fast', function() {
+				$(this).delay(500).fadeOut('fast');
+			});
+		});
+  	}, 2000);
+	
 	$.post('game', {name : $('name').val()});
     return false; 
   })

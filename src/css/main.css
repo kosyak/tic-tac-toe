@@ -48,3 +48,14 @@ input {
   font-size: 0.8em;
   padding: 3px;  
 }
+
+.info {
+  display: none;
+  position: relative;
+  float: left;
+  background-color: green;
+  border: 1px solid black;
+  font-family: "Courier New";
+  font-size: 0.8em;
+  padding: 3px;  
+}
