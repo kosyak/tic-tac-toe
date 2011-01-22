@@ -55,9 +55,9 @@ class GamePage(webapp.RequestHandler):
         cur_record_player = player.PlayerRecord()
         cur_record_player.pack(cur_player)
         cur_record_player.put()
-        self.request.cookies['uid'] = cur_player.uid  
+#        self.request.cookies['uid'] = cur_player.uid  
         self.response.headers['Content-Type'] = 'text/plain'
-        self.response.out.write('number ' + str(db.GqlQuery("SELECT * FROM PlayerRecord").count()))
+        self.response.out.write('number ' + str(cur_player.name))
         
     def get(self):
         games = db.GqlQuery("SELECT * FROM GameRecord")
@@ -92,7 +92,9 @@ class GameStart(webapp.RequestHandler):
         if not cur_query or cur_query.count(2) < 2:
             return
         else:
-            buildGame([cur_query.get(0).record_of_uid, cur_query.get(1).record_of_uid])
+            player1 = cur_query.fetch(1,0)[0]
+            player2 = cur_query.fetch(1,1)[0]
+            buildGame([player1.record_of_uid, player2.record_of_uid])
              
             #self.redirect('/game', True)
             self.response.out.write('OK')
