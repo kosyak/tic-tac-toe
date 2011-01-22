@@ -38,6 +38,6 @@ $(document).ready(function() {
       $('#throbber').fadeIn('fast');
       $('#login > p').fadeIn('fast');
     });
-    return false; 
+    return true; 
   })
 });

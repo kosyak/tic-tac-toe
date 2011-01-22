@@ -26,15 +26,12 @@ class MainPage(webapp.RequestHandler):
         self.response.out.write(template.render(path, {}))
 
 
-def buildGame(players_names):
-        #players_names = self.request.get("content")
-        first_name = players_names.split()[0]
-        second_name = players_names.split()[1]
-        curent_game = game.TheGame(player.getUid(first_name),player.getUid(second_name))
+def buildGame(players_ids):
+        curent_game = game.TheGame(players_ids[0], players_ids[1])
         curent_game_record = game.GameRecord()
         curent_game_record.pack(curent_game)
         curent_game_record.put()
-        #self.redirect('/game', True)
+        
 
 class OnlineChecker(webapp.RequestHandler):
     def post(self):
@@ -42,8 +39,8 @@ class OnlineChecker(webapp.RequestHandler):
             return
         cur_uid = self.request.cookies.get('uid', None)
         if cur_uid:
-            cur_query = db.GqlQuery("SELECT * FROM Player " + 
-                "WHERE record_of_uid = :1", cur_uid)
+            cur_query = db.GqlQuery("SELECT * FROM PlayerRecord " + 
+                "WHERE record_of_uid = :1", str(cur_uid))
             cur_player_record = cur_query.get()
             if not cur_player_record:
                 return
@@ -58,7 +55,9 @@ class GamePage(webapp.RequestHandler):
         cur_record_player = player.PlayerRecord()
         cur_record_player.pack(cur_player)
         cur_record_player.put()
-        #make cookies
+        self.request.cookies['uid'] = cur_player.uid  
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write('number ' + str(db.GqlQuery("SELECT * FROM PlayerRecord").count()))
         
     def get(self):
         games = db.GqlQuery("SELECT * FROM GameRecord")
@@ -78,9 +77,7 @@ class GamePage(webapp.RequestHandler):
 class TestPage(webapp.RequestHandler):
     def get(self):
         self.response.headers['Content-Type'] = 'text/html'
-        path = os.path.join(os.path.dirname(__file__), 'html/test.html')
-        self.response.out.write(template.render(path, {}))
-
+        self.response.out.write('number ' + str(db.GqlQuery("SELECT * FROM PlayerRecord").count()))
     def post(self):
         self.response.headers['Content-Type'] = 'text/plain'
         self.response.out.write(self.request.get('data'))
@@ -88,11 +85,23 @@ class TestPage(webapp.RequestHandler):
         #self.response.out.write(template.render(path, {}))
         #print 'POST'
                 
+class GameStart(webapp.RequestHandler):
+    def get(self):
+        cur_query = db.GqlQuery("SELECT * FROM PlayerRecord " + 
+                                "WHERE record_of_last_online > :1", str(time.mktime(time.gmtime()) - 20))
+        if not cur_query or cur_query.count(2) < 2:
+            return
+        else:
+            buildGame([cur_query.get(0).record_of_uid, cur_query.get(1).record_of_uid])
+             
+            self.redirect('/game', True)     
+        
+
 application = webapp.WSGIApplication([('/', MainPage),
                                       (r'/[G,g]ame', GamePage),
                                       (r'/[T,t]est', TestPage),
-                                      ('/onlinechecker', OnlineChecker)],
-                                      ('gamestart', GameStarer)
+                                      ('/onlinechecker', OnlineChecker),
+                                      ('/gamestart', GameStart)],
                                       debug=True)
 
 
