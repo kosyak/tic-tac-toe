@@ -33,11 +33,11 @@ $(document).ready(function() {
       $('#login > p').fadeIn('fast');
     });
 	
-	setInterval(function checkGameStart() {
-  		$.get('gamestart', {}, function() {});
+	setInterval(function () {
+  		$.get('gamestart', {});
   	}, 2000);
 	
-	setInterval(function checkGameStart() {
+	setInterval(function () {
   		$.get('test', {}, function(data) {
 			$('#info').text(data).fadeIn('fast', function() {
 				$(this).delay(500).fadeOut('fast');
@@ -47,5 +47,5 @@ $(document).ready(function() {
 	
 	$.post('game', {name : $('name').val()});
     return false; 
-  })
+  });
 });
