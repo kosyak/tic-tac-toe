@@ -3,8 +3,9 @@
 
 body {
   font-size: 100%;
-  margin-left:auto;
-  margin-right:auto;
+/*  margin-left:auto;
+  margin-right:auto;*/
+  margin: 5px;
 }
 
 .login {
@@ -31,4 +32,15 @@ input {
   width: 64px;
   display: none;
 /*  position: fixed;*/
+}
+
+.error {
+  display: none;
+  position: relative;
+  float: right;
+  background-color: red;
+  border: 1px solid black;
+  font-family: "Courier New";
+  font-size: 0.8em;
+  padding: 3px;  
 }

@@ -17,6 +17,11 @@ $(document).ready(function() {
   setInterval(function() {
     $.post('onlinechecker', {online: '1'}, function(data) {});
   }, 5000);
+  
+  setInterval(function() {
+    $('#offline').fadeIn('slow', function() {
+      $(this).delay(5000).fadeOut('slow');
+  })}, 7000);
                    
   $('#login form > input[type="submit"]').click(function() {
 /*    return true; */
