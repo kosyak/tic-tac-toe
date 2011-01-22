@@ -8,6 +8,10 @@ body {
   margin: 5px;
 }
 
+form {
+  width: 1200px;
+}
+
 .login {
   height: 100px;
   position: absolute;

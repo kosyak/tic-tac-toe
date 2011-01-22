@@ -3,12 +3,16 @@ function checkGameStart() {
 };
 
 $(document).ready(function() {
-  $paddingX = $(document).width()*0.99;
-  $paddingY = $(document).height()*0.99;
+  var $paddingX = $(document).width();
+  var $paddingY = $(document).height();
+  var formWidth = 0;
   $('#login form > input').each(function() {
-    $paddingX -= $(this).outerWidth();
+    formWidth += $(this).outerWidth();
     $paddingY -= $(this).innerHeight();
   });
+  $('#login form').css({'width' : (10+formWidth)+'px'});
+  $paddingX -= $('#login form').outerWidth();
+  $paddingY -= $('#login form').outerHeight();
   $paddingX /= 2; 
   $paddingY /= 2;
   $('#login').css({'padding':   $paddingY + 'px ' + 
