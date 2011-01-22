@@ -3,16 +3,32 @@
 
 body {
   font-size: 100%;
+  margin-left:auto;
+  margin-right:auto;
 }
 
 .login {
   height: 100px;
-  position: absolute
+  position: absolute;
+}
+
+p {
+  font-family: "Courier New";
+/*  position: absolute;*/
+  text-align:center;
+  font-size: 2.5em;
+  display:none;  
 }
 
 input {
-  position: absolute 
-  font-family: "Lucida Console";
-  font-size: 2.5em;
-  height: 55px;
+  font-family: "Courier New";
+/*  position: absolute; */
+  font-size: 2.5em; 
+  height: 55px; 
+}
+
+#throbber {
+  width: 64px;
+  display: none;
+/*  position: fixed;*/
 }

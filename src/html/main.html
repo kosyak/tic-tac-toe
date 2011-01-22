@@ -10,10 +10,12 @@
  
   <body>
     <div id="login">
-      <form method=GET action="game">
-        <input type=text></input>
+      <form method=POST action="gamestart">
+        <input type=text name="content"></input>
         <input type=submit value="wants to Play"></input>
       </form>
+      <img id="throbber" src="img/throbber.gif">
+      <p>Waiting for another player</p>
     </div>
   </body>
 </html>
