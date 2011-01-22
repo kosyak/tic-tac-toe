@@ -13,9 +13,13 @@ $(document).ready(function() {
                    'padding-right': ($(document).width()-$paddingX) + 'px',*/
                    });
   $('#throbber').css({'padding-left': ($('#login').width()*0.5-32)+'px'});
+  
+  setInterval(function() {
+    $.post('onlinechecker', {online: '1'}, function(data) {});
+  }, 5000);
                    
   $('#login form > input[type="submit"]').click(function() {
-    return true;
+/*    return true; */
     $(this).parent().fadeOut('slow', function() {
       $('#throbber').fadeIn('fast');
       $('#login > p').fadeIn('fast');
