@@ -6,7 +6,7 @@ $(document).ready(function() {
     formWidth += $(this).outerWidth();
     $paddingY -= $(this).innerHeight();
   });
-  $('#login form').css({'width' : (10+formWidth)+'px'});
+  $('#login form').css({'width' : (20+formWidth)+'px'});
   $paddingX -= $('#login form').outerWidth();
   $paddingY -= $('#login form').outerHeight();
   $paddingX /= 2; 
@@ -35,7 +35,7 @@ $(document).ready(function() {
 	
 	setInterval(function checkGameStart() {
   		$.get('gamestart', {}, function() {});
-  	}, 1000);
+  	}, 2000);
 	
 	$.post('game', {name : $('name').val()});
     return false; 
