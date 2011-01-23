@@ -26,6 +26,7 @@ class TheGame:
         self.number_of_turns = 0
         self.board = [[None] * SIZE_OF_BOARD for i in range(0, SIZE_OF_BOARD)]
         self.winning_string = None
+        self.last_move = None
         
     def checkForEnd(self):
         dx_list = [+1, +1,  0]
@@ -43,6 +44,7 @@ class TheGame:
     def makeMove(self, x, y):
         if self.board[x][y] != None:
             return False
+        self.last_move = (self.turn, x, y)
         self.number_of_turns += 1
         self.board[x][y] = self.turn
         self.turn = 1 - self.turn
@@ -60,7 +62,7 @@ class GameRecord(db.Model):
     record_of_turn = db.StringProperty(multiline=False)
     record_of_is_ended = db.StringProperty(multiline=False)
     record_of_numner_of_turns = db.StringProperty(multiline=False)
-
+    record_of_last_move = db.StringProperty(multiline=False)
     #def __init__(self, some_game):
         #db.Model.__init__(self)
     def pack(self, some_game):
@@ -71,6 +73,7 @@ class GameRecord(db.Model):
         self.record_of_turn = str(some_game.turn)
         self.record_of_is_ended = str(some_game.is_ended)
         self.record_of_numner_of_turns = str(some_game.number_of_turns)
+        self.record_of_last_move = str(some_game.last_move)
     def unPack(self):
         curent_game = TheGame(0, 0)
         curent_game.board = eval(self.record_of_board)
@@ -80,6 +83,7 @@ class GameRecord(db.Model):
         curent_game.turn = eval(self.record_of_turn)
         curent_game.is_ended = eval(self.record_of_is_ended)
         curent_game.number_of_turns = eval(self.record_of_numner_of_turns)
+        curent_game.last_move = eval(self.record_of_last_move)
         return curent_game
         
         

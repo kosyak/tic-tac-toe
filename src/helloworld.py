@@ -136,7 +136,13 @@ class TestPage(webapp.RequestHandler):
             self.response.out.write('Name is ' + str(cur_player_record.record_of_name) + '<br>')
             self.response.out.write('Uid is ' + str(cur_player_record.record_of_uid) + '<br>')
             self.response.out.write('Last online is ' + str(cur_player_record.record_of_last_online) + '<br>')
-            self.response.out.write(str(db.GqlQuery("SELECT * FROM GameRecord WHERE record_of_game_id = :1", str(cur_player_record.record_of_game_id)).count()) + '<br>')
+            q = db.GqlQuery("SELECT * FROM GameRecord WHERE record_of_game_id = :1", str(cur_player_record.record_of_game_id)).get()
+            self.response.out.write('GameId is '+ str(q.record_of_game_id) + '<br>')
+            self.response.out.write('First player uid is '+ str(q.record_first_player_uid) + '<br>')
+            self.response.out.write('Second player uid is '+ str(q.record_second_player_uid) + '<br>')
+            self.response.out.write('Curent turn is '+ str(q.record_of_turn) + '<br>')
+            self.response.out.write('Last move is '+ str(q.record_of_last_move) + '<br>')
+            self.response.out.write('<br>')
         else:
             self.response.out.write("No such user")
         self.response.out.write("=" * 90 + "<br>")
@@ -226,8 +232,18 @@ class GameProcess(webapp.RequestHandler):
         else:
             self.response.out.write('cannot')
         
-        
-            
+class GameRepaint(webapp.RequestHandler):
+    def post(self):
+        game_id = getGameIdByRequest(self.request)
+        player_id = getUserIdByRequest(self.request)
+        cur_game_record = db.GqlQuery("SELECT * FROM GameRecord WHERE record_of_game_id = :1", str(game_id)).get()
+        if not cur_game_record:
+            self.error(301)
+            return  
+        cur_game = cur_game_record.unPack()
+        if cur_game.last_move and cur_game.last_move[0] == 1 and cur_game.first_player_uid == player_id or\
+           cur_game.last_move and cur_game.last_move[0] == 0 and cur_game.second_player_uid == player_id:
+            self.response.out.write(('X' if not cur_game.last_move[0] else 'O') + ' ' + str(cur_game.last_move[1]) + ' ' + cur_game.last_move[2])
             
 
 application = webapp.WSGIApplication([('/', MainPage),
@@ -235,7 +251,8 @@ application = webapp.WSGIApplication([('/', MainPage),
                                       (r'/[T,t]est', TestPage),
                                       ('/onlinechecker', OnlineChecker),
                                       ('/gamestart', GameStart),
-                                      ('/gameprocess', GameProcess)],
+                                      ('/gameprocess', GameProcess),
+                                      ('/gamerepaint', GameRepaint)],
                                       debug=True)
 
 
