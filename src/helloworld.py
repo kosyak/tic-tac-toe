@@ -241,10 +241,10 @@ class GameRepaint(webapp.RequestHandler):
             self.error(301)
             return  
         cur_game = cur_game_record.unPack()
-        if cur_game.last_move != None and cur_game.last_move[0] == 1 and cur_game.first_player_uid == player_id or\
-           cur_game.last_move != None and cur_game.last_move[0] == 0 and cur_game.second_player_uid == player_id:
-            self.response.out.write(('X' if not cur_game.last_move[0] else 'O') + ' ' + str(cur_game.last_move[1]) + ' ' + str(cur_game.last_move[2]))
-            
+        if cur_game.last_move and cur_game.last_move[0] == 1 and cur_game.first_player_uid == player_id or\
+           cur_game.last_move and cur_game.last_move[0] == 0 and cur_game.second_player_uid == player_id:
+            self.response.out.write(('Y' if cur_game.last_move[0] == 0 else 'A') + ' ' + str(cur_game.last_move[1]) + ' ' + str(cur_game.last_move[2]))
+        
 
 application = webapp.WSGIApplication([('/', MainPage),
                                       (r'/[G,g]ame', GamePage),
