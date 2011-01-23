@@ -24,12 +24,12 @@ $(document).ready(function () {
 	setInterval(function() {
 		$.post('gamerepaint', {}, function(data) {
 			if(data) {
-				data = data.split(' ');
-				$td = $('#gametable > table > tbody > tr:eq('+(parseInt(data[2]))+') > td:eq('+(parseInt(data[1]))+')');
-				$td.text(data[0]);
+				a = data.split(' ');
+				$this = $('#gametable > table > tbody > tr:eq('+(parseInt(a[2]))+') > td:eq('+(parseInt(a[1]))+')');
+				$this.text(a[0]);
 			}
 		});
-	}, 1000);				
+	}, 3000);				
 	$('td').hover(function () {
 		$(this).css({'background-color': 'white'})}, 
 		function() {$(this).css({'background-color': 'yellow'})})
