@@ -3,11 +3,14 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext.webapp import template
 from google.appengine.ext import db
+import google.appengine.ext
 
 import game
 import player
 import random
 import time
+
+DIFF_TIME = 600
 
 class MainPage(webapp.RequestHandler):
     def get(self):
@@ -39,23 +42,27 @@ class OnlineChecker(webapp.RequestHandler):
             return
         cur_uid = self.request.cookies.get('uid', None)
         if cur_uid:
+            #self.request.error(404)
             cur_query = db.GqlQuery("SELECT * FROM PlayerRecord " + 
-                "WHERE record_of_uid = :1", str(cur_uid))
+                "WHERE record_of_uid = :1", cur_uid)
             cur_player_record = cur_query.get()
             if not cur_player_record:
                 return
             cur_player_record.record_last_online = time.mktime(time.gmtime())
             cur_player_record.put()
+        else:
+            #self.request.error(404)
+            pass
             
 
 class GamePage(webapp.RequestHandler):
     def post(self):
-        player_name = self.request.get('name')
+        player_name = self.request.get('name', None)
         cur_player = player.Player(player_name)
         cur_record_player = player.PlayerRecord()
         cur_record_player.pack(cur_player)
         cur_record_player.put()
-        self.request.cookies['uid'] = cur_player.uid  
+        #self.response.cookies['uid'] = cur_player.uid
         self.response.headers['Content-Type'] = 'text/plain'
         self.response.out.write('number ' + str(db.GqlQuery("SELECT * FROM PlayerRecord").count()))
         
@@ -77,7 +84,15 @@ class GamePage(webapp.RequestHandler):
 class TestPage(webapp.RequestHandler):
     def get(self):
         self.response.headers['Content-Type'] = 'text/html'
-        self.response.out.write('number ' + str(db.GqlQuery("SELECT * FROM PlayerRecord").count()))
+        self.response.out.write('number ' + str(db.GqlQuery("SELECT * FROM PlayerRecord").count()) + '<br>')
+
+        for q in db.GqlQuery("SELECT * FROM PlayerRecord " + 
+                                "WHERE record_of_last_online > :1", time.mktime(time.gmtime()) - DIFF_TIME):
+            self.response.out.write('Name is ' + str(q.record_of_name) + '<br>')
+            self.response.out.write('Uid is ' + str(q.record_of_uid) + '<br>')
+            self.response.out.write('Last online is ' + str(q.record_of_last_online))
+       
+        
     def post(self):
         self.response.headers['Content-Type'] = 'text/plain'
         self.response.out.write(self.request.get('data'))
@@ -88,14 +103,15 @@ class TestPage(webapp.RequestHandler):
 class GameStart(webapp.RequestHandler):
     def get(self):
         cur_query = db.GqlQuery("SELECT * FROM PlayerRecord " + 
-                                "WHERE record_of_last_online > :1", str(time.mktime(time.gmtime()) - 20))
-        if not cur_query or cur_query.count(2) < 2:
+                                "WHERE record_of_last_online > :1 LIMIT 2", time.mktime(time.gmtime()) - DIFF_TIME)
+        if False and not cur_query or cur_query.count(2) < 2:
             return
         else:
-            buildGame([cur_query.get(0).record_of_uid, cur_query.get(1).record_of_uid])
-             
-            #self.redirect('/game', True)
+            buildGame([cur_query[0].record_of_uid, cur_query[1].record_of_uid])
+            cur_query[0].delete()
+            cur_query[0].delete()
             self.response.out.write('OK')
+            #self.redirect('/game', True)
         
 
 application = webapp.WSGIApplication([('/', MainPage),
