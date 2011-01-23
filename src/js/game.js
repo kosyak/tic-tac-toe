@@ -29,6 +29,15 @@ $(document).ready(function () {
 			$(this).unbind('click');
 			return false;
 			}
+		$.post('gameprocess', {checked : "1"}, function(data) {
+			if(data['canCheck'] == '1')
+			{
+				var symb = $(this).text();
+				if(symb != 'X' && symb != 'O')
+				{
+					(curPlayer == 0) ? $(this).text('O') : $(this).text('X');
+					curPlayer = 1 - curPlayer;
+
 //		var delta = 
 		var xCoord = Math.floor((data['clientX']/* - $(this).parent().css(''))*/) / $(this).innerWidth());
 		var yCoord = Math.floor(data['clientY'] / $(this).innerHeight()); 
@@ -44,6 +53,12 @@ $(document).ready(function () {
 				if(notendedExp.test(data)){
 					
 				}
+		
+				var xCoord = Math.floor(data['clientX'] / $(this).innerWidth());
+				var yCoord = Math.floor(data['clientY'] / $(this).innerHeight()); 
+				$.post('gameprocess', {x : ''+xCoord, y : ''+yCoord}, function(data) {
+					if(data['gameEnded']) gameEnded = true;
+				});
 				else {
 					gameEnded = true;
 					$('body').append('<p id="info"></p>');
