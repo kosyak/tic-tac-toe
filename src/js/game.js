@@ -1,3 +1,27 @@
+function setStatus(old_status, new_status) {
+	if(old_status == new_status) return;
+	$info = $('#info');
+	$info.fadeOut('fast');
+	switch (new_status) {
+		case 'you_lose':
+			$info.text('You lose');
+		break;
+		case 'your_move':
+			$info.text('Your turn');
+		break;
+		case 'you_win':
+			$info.text('You won');
+		break;
+		case 'not_your_move':
+			$info.text("Opponent's turn");
+		break;
+		case 'opponent_offline':
+			$info.text("Opponent is offline");
+		break;
+ 	}
+	$info.fadeIn('fast');
+};
+
 $(document).ready(function () {
 	var size = 5;
 	var $tbody = $('tbody');
@@ -13,6 +37,16 @@ $(document).ready(function () {
 $(document).ready(function () {
 	var gameEnded = false;
 	var curPlayer = $.cookie("playerNumber");
+	var status = '';
+	
+	$.post('gamestatus', {}, function(data) {
+		setStatus(status, data);
+	    setInterval(function() {
+    		$.post('gamestatus', {}, function(data) {
+			setStatus(status, data);
+		});
+	}, 1000)
+	});
 	
     setInterval(function() {
       $.post('onlinechecker', {online: '1'}, function(data) {
@@ -42,6 +76,7 @@ $(document).ready(function () {
 //		var delta = 
 		var xCoord = Math.floor((data['clientX']/* - $(this).parent().css(''))*/) / $(this).innerWidth());
 		var yCoord = Math.floor(data['clientY'] / $(this).innerHeight()); 
+		$('#error').fadeIn('fast').text('x='+xCoord+' y='+yCoord);
 		$.post('gameprocess', {x : ''+xCoord, y : ''+yCoord}, function(data) {
 			var cannotExp = /cannot/;
 			if(cannotExp.test(data)){
