@@ -44,7 +44,7 @@ $(document).ready(function() {
 	setInterval(function () {
   		$.get('test', {}, function(data) {
 			$('#info').text(data).fadeIn('fast', function() {
-				$(this).delay(500).fadeOut('fast');
+				$(this).delay(1500).fadeOut('fast');
 			});
 		});
   	}, 2000);
