@@ -20,7 +20,15 @@ $(document).ready(function () {
 		    $('#offline').text('Other player is offline!').fadeIn('slow');
 		}});
 	}, 5000);
-				
+	
+	setInterval(function() {
+		$.post('gamerepaint', {}, function(data) {
+			if(data) {
+				data.split(' ');
+				$('#gametable > table > tbody >tr:nth-child('+(parseInt(data[1])+1)+') > td:nth-child('+(parseInt[2]+1)+')').text(data[0]);
+			}
+		});
+	}, 1000);				
 	$('td').hover(function () {
 		$(this).css({'background-color': 'white'})}, 
 		function() {$(this).css({'background-color': 'yellow'})})
