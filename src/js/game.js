@@ -3,16 +3,16 @@ function setStatus(old_status, new_status) {
 	$info = $('#info');
 	$info.fadeOut('fast');
 	switch (new_status) {
-		case 'you_lose':
+		case 'lose':
 			$info.text('You lose');
 		break;
-		case 'your_move':
+		case 'move':
 			$info.text('Your turn');
 		break;
-		case 'you_win':
+		case 'win':
 			$info.text('You won');
 		break;
-		case 'not_your_move':
+		case 'not_move':
 			$info.text("Opponent's turn");
 		break;
 		case 'opponent_offline':
@@ -20,6 +20,8 @@ function setStatus(old_status, new_status) {
 		break;
  	}
 	$info.fadeIn('fast');
+	old_status = new_status;
+	return old_status;
 };
 
 $(document).ready(function () {
@@ -40,10 +42,10 @@ $(document).ready(function () {
 	var status = '';
 	
 	$.post('gamestatus', {}, function(data) {
-		setStatus(status, data);
+		status = setStatus(status, data);
 	    setInterval(function() {
     		$.post('gamestatus', {}, function(data) {
-			setStatus(status, data);
+			status = setStatus(status, data);
 		});
 	}, 1000)
 	});
