@@ -15,7 +15,6 @@ def getUid(name):
             res -= 10**9 + 9
     return int(random.random() * res) 
 
-
 class Player:
     '''
     Player class

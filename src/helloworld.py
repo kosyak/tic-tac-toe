@@ -142,6 +142,7 @@ class TestPage(webapp.RequestHandler):
             self.response.out.write('Second player uid is '+ str(q.record_second_player_uid) + '<br>')
             self.response.out.write('Curent turn is '+ str(q.record_of_turn) + '<br>')
             self.response.out.write('Last move is '+ str(q.record_of_last_move) + '<br>')
+            self.response.out.write('Is_ended is '+ str(q.record_of_is_ended) + '<br>')
             self.response.out.write('<br>')
         else:
             self.response.out.write("No such user")
