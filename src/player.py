@@ -11,7 +11,7 @@ def getUid(name):
     res = 0
     for ch in name:
         res = res * 239 + ord(ch)
-        if res > 10**9 + 9:
+        while res > 10**9 + 9:
             res -= 10**9 + 9
     return int(random.random() * res) 
 
