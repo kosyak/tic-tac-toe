@@ -24,8 +24,9 @@ $(document).ready(function () {
 	setInterval(function() {
 		$.post('gamerepaint', {}, function(data) {
 			if(data) {
-				data.split(' ');
-				$('#gametable > table > tbody >tr:nth-child('+(parseInt(data[1])+1)+') > td:nth-child('+(parseInt[2]+1)+')').text(data[0]);
+				data = data.split(' ');
+				$td = $('#gametable > table > tbody > tr:eq('+(parseInt(data[2]))+') > td:eq('+(parseInt(data[1]))+')');
+				$td.text(data[0]);
 			}
 		});
 	}, 1000);				
