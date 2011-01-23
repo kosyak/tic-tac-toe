@@ -215,8 +215,11 @@ class GameProcess(webapp.RequestHandler):
         cur_game = cur_game_record.unPack()
         x = int(self.request.get('x'))
         y = int(self.request.get('y'))
-        if cur_game.is_ended or cur_game.turn == 0 and cur_game.first_player_uid == player_id or\
+        if cur_game.turn == 0 and cur_game.first_player_uid == player_id or\
            cur_game.turn == 1 and cur_game.second_player_uid == player_id:
+            if cur_game.is_ended:
+                self.response.out.write('cannot')
+                return
             can_move = cur_game.makeMove(x, y)
             cur_game_record.pack(cur_game)
             cur_game_record.put()
