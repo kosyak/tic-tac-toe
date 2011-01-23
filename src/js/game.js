@@ -19,7 +19,7 @@ $(document).ready(function () {
 	  	if(data['otherPlayerOfflie']) {
 		    $('#offline').text('Other player is offline!').fadeIn('slow');
 		}});
-	});
+	}, 5000);
 				
 	$('td').hover(function () {
 		$(this).css({'background-color': 'white'})}, 

@@ -8,7 +8,7 @@ import game
 import player
 import time
 
-DIFF_TIME = 10
+DIFF_TIME = 20
 
 def getGameIdByRequest(request):
     cur_uid = int(request.cookies.get('uid', None))
@@ -47,7 +47,6 @@ def buildGame(players_ids):
         curent_game_record.pack(curent_game)
         curent_game_record.put()
         return curent_game.game_id
-        
 
 class OnlineChecker(webapp.RequestHandler):
     def post(self):
@@ -137,8 +136,15 @@ class TestPage(webapp.RequestHandler):
             self.response.out.write('Name is ' + str(cur_player_record.record_of_name) + '<br>')
             self.response.out.write('Uid is ' + str(cur_player_record.record_of_uid) + '<br>')
             self.response.out.write('Last online is ' + str(cur_player_record.record_of_last_online) + '<br>')
+            self.response.out.write(str(db.GqlQuery("SELECT * FROM GameRecord WHERE record_of_game_id = :1", str(cur_player_record.record_of_game_id)).count()) + '<br>')
         else:
             self.response.out.write("No such user")
+        self.response.out.write("=" * 90 + "<br>")
+        for q in db.GqlQuery("SELECT * FROM GameRecord"):
+            self.response.out.write('GameId is '+ str(q.record_of_game_id) + '<br>')
+            self.response.out.write('First player uid is '+ str(q.record_first_player_uid) + '<br>')
+            self.response.out.write('Second player uid is '+ str(q.record_second_player_uid) + '<br><br>')
+            
         
     def post(self):
         self.response.headers['Content-Type'] = 'text/plain'
@@ -154,7 +160,7 @@ class GameStart(webapp.RequestHandler):
                 "WHERE record_of_uid = :1", cur_uid)
         cur_player_record = cur_query.get()
         if not cur_player_record:
-            self.error(111)
+            #self.error(111)
             return 
         
         if cur_player_record.record_of_game_id:
@@ -169,7 +175,11 @@ class GameStart(webapp.RequestHandler):
             return
         else:
             for player in cur_query:
-                if player != cur_player_record and not player.record_of_game_id: 
+                if player.record_of_uid != cur_player_record.record_of_uid and not player.record_of_game_id:
+                    cur_player_record.record_of_game_id = 1635
+                    player.record_of_game_id = 1635
+                    cur_player_record.put()
+                    player.put()
                     cur_game = buildGame(list((cur_player_record.record_of_uid, player.record_of_uid)))
                     #cur_player_record.delete()
                     cur_player_record.record_of_game_id = cur_game
@@ -188,25 +198,27 @@ class GameProcess(webapp.RequestHandler):
     def post(self):
         game_id = getGameIdByRequest(self.request)
         player_id = getUserIdByRequest(self.request)
-        cur_game_record = db.GqlQuery("SELECT * FROM GameRecord WHERE record_of_game_id = :1", game_id).get() 
+        cur_game_record = db.GqlQuery("SELECT * FROM GameRecord WHERE record_of_game_id = :1", str(game_id)).get()
+        if not cur_game_record:
+            self.error(301)
+            return  
         cur_game = cur_game_record.unPack()
-        x = self.request.get('x')
-        y = self.request.get('y')
+        x = int(self.request.get('x'))
+        y = int(self.request.get('y'))
         if cur_game.turn == 0 and cur_game.first_player_uid == player_id or\
            cur_game.turn == 1 and cur_game.second_player_uid == player_id:
-             
             can_move = cur_game.makeMove(x, y)
             if not can_move:
-                self.response.write.out('cannot')
+                self.response.out.write('cannot')
                 return
-            self.response.write.out('can ')
-            self.response.write.out(' ' + ('X' if cur_game.turn else 'O') + ' ')
+            self.response.out.write('can ')
+            self.response.out.write(' ' + ('X' if cur_game.turn else 'O') + ' ')
             if cur_game.is_ended:
-                self.response.write.out(' ended ' + cur_game.getWinningString())
+                self.response.out.write(' ended ' + cur_game.getWinningString())
             else:
-                self.response.write.out(' not_ended')
+                self.response.out.write(' not_ended')
         else:
-            self.response.write.out('cannot')
+            self.response.out.write('cannot')
             
             
 
