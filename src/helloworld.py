@@ -214,7 +214,7 @@ class GameProcess(webapp.RequestHandler):
         cur_game = cur_game_record.unPack()
         x = int(self.request.get('x'))
         y = int(self.request.get('y'))
-        if cur_game.turn == 0 and cur_game.first_player_uid == player_id or\
+        if cur_game.is_ended or cur_game.turn == 0 and cur_game.first_player_uid == player_id or\
            cur_game.turn == 1 and cur_game.second_player_uid == player_id:
             can_move = cur_game.makeMove(x, y)
             cur_game_record.pack(cur_game)
@@ -243,7 +243,7 @@ class GameRepaint(webapp.RequestHandler):
         cur_game = cur_game_record.unPack()
         if cur_game.last_move and cur_game.last_move[0] == 1 and cur_game.first_player_uid == player_id or\
            cur_game.last_move and cur_game.last_move[0] == 0 and cur_game.second_player_uid == player_id:
-            self.response.out.write(('X' if not cur_game.last_move[0] else 'O') + ' ' + str(cur_game.last_move[1]) + ' ' + cur_game.last_move[2])
+            self.response.out.write(('X' if not cur_game.last_move[0] else 'O') + ' ' + str(cur_game.last_move[1]) + ' ' + str(cur_game.last_move[2]))
             
 
 application = webapp.WSGIApplication([('/', MainPage),
