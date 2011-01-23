@@ -38,7 +38,8 @@ class TheGame:
                         self.winning_string = (str(x) + ' ' + str(y) + ' ' +
                                               str(x + dx) + ' ' + str(y + dy) + ' ' + 
                                               str(x - dx) + ' ' + str(y - dy))
-                        return True  
+                        self.is_ended = True
+                        return True
         return False
                     
     def makeMove(self, x, y):
