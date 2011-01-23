@@ -48,7 +48,7 @@ $(document).ready(function() {
 			});
 		});
   	}, 2000);
-*/	
+	
 	$.post('game', {name : $('#name').val()}, function(data) {
 		$('#info').text(data).fadeIn('fast');
 	});
