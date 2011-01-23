@@ -29,12 +29,12 @@ class TheGame:
         self.last_move = None
         
     def checkForEnd(self):
-        dx_list = [+1, +1,  0]
-        dy_list = [ 0, +1, +1]
+        dx_list = [+1, +1,  0, -1]
+        dy_list = [ 0, +1, +1, +1]
         for x in range(1, SIZE_OF_BOARD - 1):
             for y in range(1, SIZE_OF_BOARD - 1):
                 for (dx, dy) in zip(dx_list, dy_list):
-                    if self.board[x][y] == self.board[x + dx][y + dy] == self.board[x - dx][y - dy] != None:
+                    if self.board[x][y] == self.board[x + dx][y + dy] == self.board[x - dx][y - dy] and self.board[x][y] != None:
                         self.winning_string = (str(x) + ' ' + str(y) + ' ' +
                                               str(x + dx) + ' ' + str(y + dy) + ' ' + 
                                               str(x - dx) + ' ' + str(y - dy))
@@ -53,7 +53,7 @@ class TheGame:
         return True
     
     def getWinningString(self):
-        return None           
+        return self.winning_string      
        
 class GameRecord(db.Model):
     record_of_board = db.StringProperty(multiline=False)
