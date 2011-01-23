@@ -41,7 +41,7 @@ class TheGame:
         return False
                     
     def makeMove(self, x, y):
-        if self.board[x][y]:
+        if self.board[x][y] != None:
             return False
         self.number_of_turns += 1
         self.board[x][y] = self.turn
