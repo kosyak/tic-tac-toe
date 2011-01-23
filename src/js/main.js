@@ -41,14 +41,14 @@ $(document).ready(function() {
 		});
   	}, 2000);
 	
-/*	setInterval(function () {
+	setInterval(function () {
   		$.get('test', {}, function(data) {
 			$('#info').text(data).fadeIn('fast', function() {
-				$(this).delay(500).fadeOut('fast');
+				$(this).delay(1500).fadeOut('fast');
 			});
 		});
   	}, 2000);
-*/	
+	
 	$.post('game', {name : $('#name').val()}, function(data) {
 		$('#info').text(data).fadeIn('fast');
 	});
