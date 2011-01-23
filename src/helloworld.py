@@ -246,7 +246,32 @@ class GameRepaint(webapp.RequestHandler):
         cur_game = cur_game_record.unPack()
         if cur_game.last_move != None and cur_game.last_move[0] == 1 and cur_game.first_player_uid == player_id or\
            cur_game.last_move != None and cur_game.last_move[0] == 0 and cur_game.second_player_uid == player_id:
-            self.response.out.write(('Y' if not cur_game.last_move[0] else 'A') + ' ' + str(cur_game.last_move[1]) + ' ' + str(cur_game.last_move[2]))
+            self.response.out.write(('X' if not cur_game.last_move[0] else 'O') + ' ' + str(cur_game.last_move[1]) + ' ' + str(cur_game.last_move[2]))
+
+class GameStatus(webapp.RequestHandler):
+    def post(self):
+        game_id = getGameIdByRequest(self.request)
+        player_id = getUserIdByRequest(self.request)
+        cur_game_record = db.GqlQuery("SELECT * FROM GameRecord WHERE record_of_game_id = :1", str(game_id)).get()
+        if not cur_game_record:
+            self.error(301)
+            return  
+        cur_game = cur_game_record.unPack()
+        if cur_game.turn == 0 and cur_game.first_player_uid == player_id or\
+           cur_game.turn == 1 and cur_game.second_player_uid == player_id:
+                if cur_game.is_ended:
+                    self.response.out.write('lose')
+                else:
+                    self.response.out.write('move')
+        else: 
+                if cur_game.is_ended:
+                    self.response.out.write('win')
+                else:
+                    self.response.out.write('not_move')
+                
+        
+        
+
             
 
 application = webapp.WSGIApplication([('/', MainPage),
@@ -255,7 +280,8 @@ application = webapp.WSGIApplication([('/', MainPage),
                                       ('/onlinechecker', OnlineChecker),
                                       ('/gamestart', GameStart),
                                       ('/gameprocess', GameProcess),
-                                      ('/gamerepaint', GameRepaint)],
+                                      ('/gamerepaint', GameRepaint),
+                                      ('/gamestatus', GameStatus)],
                                       debug=True)
 
 

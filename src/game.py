@@ -31,10 +31,13 @@ class TheGame:
     def checkForEnd(self):
         dx_list = [+1, +1,  0, -1]
         dy_list = [ 0, +1, +1, +1]
-        for x in range(1, SIZE_OF_BOARD - 1):
-            for y in range(1, SIZE_OF_BOARD - 1):
+        for x in range(0, SIZE_OF_BOARD):
+            for y in range(0, SIZE_OF_BOARD):
                 for (dx, dy) in zip(dx_list, dy_list):
-                    if self.board[x][y] == self.board[x + dx][y + dy] == self.board[x - dx][y - dy] and self.board[x][y] != None:
+                    if (x + dx >= 0 and y + dy >= 0 and x - dx >= 0 and y - dy >= 0 and 
+                        x + dx < SIZE_OF_BOARD and y + dy < SIZE_OF_BOARD and
+                        x - dx < SIZE_OF_BOARD and y - dy < SIZE_OF_BOARD and
+                        self.board[x][y] == self.board[x + dx][y + dy] == self.board[x - dx][y - dy] and self.board[x][y] != None):
                         self.winning_string = (str(x) + ' ' + str(y) + ' ' +
                                               str(x + dx) + ' ' + str(y + dy) + ' ' + 
                                               str(x - dx) + ' ' + str(y - dy))
