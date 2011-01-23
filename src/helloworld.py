@@ -260,14 +260,14 @@ class GameStatus(webapp.RequestHandler):
         if cur_game.turn == 0 and cur_game.first_player_uid == player_id or\
            cur_game.turn == 1 and cur_game.second_player_uid == player_id:
                 if cur_game.is_ended:
-                    self.response.out.write('you_lose')
+                    self.response.out.write('lose')
                 else:
-                    self.response.out.write('your_move')
+                    self.response.out.write('move')
         else: 
                 if cur_game.is_ended:
-                    self.response.out.write('you_win')
+                    self.response.out.write('win')
                 else:
-                    self.response.out.write('not_your_move')
+                    self.response.out.write('not_move')
                 
         
         
