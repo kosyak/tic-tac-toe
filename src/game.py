@@ -28,11 +28,12 @@ class TheGame:
     
     def checkForEnd(self):
         self.is_ended = self.number_of_turns == 2
-    
+            
     def makeMove(self, x, y):
         self.number_of_turns += 1
         self.board[x][y] = self.turn
         self.turn ^= 1
+        self.checkForEnd()
        
 class GameRecord(db.Model):
     record_of_board = db.StringProperty(multiline=False)

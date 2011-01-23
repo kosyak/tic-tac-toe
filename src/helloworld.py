@@ -3,14 +3,26 @@ from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext.webapp import template
 from google.appengine.ext import db
-import google.appengine.ext
 
 import game
 import player
-import random
 import time
 
 DIFF_TIME = 10
+
+def getGameIdByRequest(request):
+    cur_uid = int(request.cookies.get('uid', None))
+    cur_query = db.GqlQuery("SELECT * FROM PlayerRecord " + 
+               "WHERE record_of_uid = :1", cur_uid)
+    cur_player_record = cur_query.get()
+    if not cur_player_record:
+        return None 
+        
+    return cur_player_record.record_of_game_id
+            
+def getUserIdByRequest(request):
+    return int(request.cookies.get('uid', None))
+         
 
 class MainPage(webapp.RequestHandler):
     def get(self):
@@ -75,7 +87,10 @@ class GamePage(webapp.RequestHandler):
         self.response.out.write('number ' + str(db.GqlQuery("SELECT * FROM PlayerRecord").count()))
         
     def get(self):
-        self.response.headers['Content-Type'] = 'text/plain'
+        path = os.path.join(os.path.dirname(__file__), r'html\game.html')
+        self.response.out.write(template.render(path, {}))
+        #self.response.out.write(path)
+        '''self.response.headers['Content-Type'] = 'text/plain'
         cur_uid = int(self.request.cookies.get('uid', None))
         if cur_uid:
             cur_query = db.GqlQuery("SELECT * FROM PlayerRecord " + 
@@ -97,7 +112,8 @@ class GamePage(webapp.RequestHandler):
 #       self.response.out.write('A Game will be here soon!')
         #path = os.path.join(os.path.dirname(__file__), 'html/game.html')
 #        print path
-        #self.response.out.write(template.render(path, {}))
+        #self.response.out.write(template.render(path, {}))'''
+        
 
 class TestPage(webapp.RequestHandler):
     def get(self):
@@ -168,13 +184,33 @@ class GameStart(webapp.RequestHandler):
             else:
                 self.error(333)
         
-        
+class GameProcess(webapp.RequestHandler):
+    def post(self):
+        game_id = getGameIdByRequest(self.request)
+        player_id = getUserIdByRequest(self.request)
+        cur_game_record = db.GqlQuery("SELECT * FROM GameRecord WHERE record_of_game_id = :1", game_id) 
+        cur_game = cur_game_record.unPack()
+        x = self.request.get('x')
+        y = self.request.get('y')
+        if cur_game.turn == 0 and cur_game.first_player_uid == player_id or\
+           cur_game.turn == 1 and cur_game.second_player_uid == player_id:
+            self.response.write.out('can ') 
+            cur_game.makeMove(x, y)
+            if cur_game.is_ended:
+                self.response.write.out(' ended ' + cur_game.getWinningString())
+            else:
+                self.response.write.out(' not_ended')
+        else:
+            self.response.write.out('cannot')
+            
+            
 
 application = webapp.WSGIApplication([('/', MainPage),
                                       (r'/[G,g]ame', GamePage),
                                       (r'/[T,t]est', TestPage),
                                       ('/onlinechecker', OnlineChecker),
-                                      ('/gamestart', GameStart)],
+                                      ('/gamestart', GameStart),
+                                      ('/gameprocess', GameProcess)],
                                       debug=True)
 
 
