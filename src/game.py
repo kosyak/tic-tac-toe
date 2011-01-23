@@ -80,7 +80,7 @@ class GameRecord(db.Model):
         curent_game.turn = eval(self.record_of_turn)
         curent_game.is_ended = eval(self.record_of_is_ended)
         curent_game.number_of_turns = eval(self.record_of_numner_of_turns)
-    
+        return curent_game
         
         
          
