@@ -75,13 +75,23 @@ class GamePage(webapp.RequestHandler):
         self.response.out.write('number ' + str(db.GqlQuery("SELECT * FROM PlayerRecord").count()))
         
     def get(self):
-        games = db.GqlQuery("SELECT * FROM GameRecord")
         self.response.headers['Content-Type'] = 'text/plain'
-        self.response.out.write("There is a list of game_ids: \n")
-        c = 0
-        for g in games: 
-            c += 1
-            self.response.out.write(str(c) + '-th game has id ' + g.record_of_game_id + '\n')
+        cur_uid = int(self.request.cookies.get('uid', None))
+        if cur_uid:
+            cur_query = db.GqlQuery("SELECT * FROM PlayerRecord " + 
+                "WHERE record_of_uid = :1", cur_uid)
+            cur_player_record = cur_query.get()
+            if not cur_player_record:
+                return
+            self.response.out.write("This man plays into game with id = " + str(cur_player_record.record_of_game_id) + '!\n')
+            #cur_player_record.record_of_last_online = time.mktime(time.gmtime())
+        #games = db.GqlQuery("SELECT * FROM GameRecord")
+        #self.response.headers['Content-Type'] = 'text/plain'
+        #self.response.out.write("There is a list of game_ids: \n")
+        #c = 0
+        #for g in games: 
+        #    c += 1
+        #    self.response.out.write(str(c) + '-th game has id ' + g.record_of_game_id + '\n')
              
         
 #       self.response.out.write('A Game will be here soon!')
@@ -99,6 +109,7 @@ class TestPage(webapp.RequestHandler):
             self.response.out.write('Name is ' + str(q.record_of_name) + '<br>')
             self.response.out.write('Uid is ' + str(q.record_of_uid) + '<br>')
             self.response.out.write('Last online is ' + str(q.record_of_last_online) + '<br>')
+            self.response.out.write('Game id is ' + str(q.record_of_game_id) + '<br>')
             
         self.response.out.write("=" * 90 + "<br>")
         cur_uid = int(self.request.cookies.get('uid', None))
@@ -122,16 +133,41 @@ class TestPage(webapp.RequestHandler):
                 
 class GameStart(webapp.RequestHandler):
     def get(self):
+        cur_uid = int(self.request.cookies.get('uid', None))
         cur_query = db.GqlQuery("SELECT * FROM PlayerRecord " + 
-                                "WHERE record_of_last_online > :1 LIMIT 2", time.mktime(time.gmtime()) - DIFF_TIME)
-        if False and not cur_query or cur_query.count(2) < 2:
+                "WHERE record_of_uid = :1", cur_uid)
+        cur_player_record = cur_query.get()
+        if not cur_player_record:
+            self.error(111)
+            return 
+        
+        if cur_player_record.record_of_game_id:
+            #cur_player_record.delete()
+            self.response.out.write('OK')
+            return
+            
+        cur_query = db.GqlQuery("SELECT * FROM PlayerRecord " + 
+                                "WHERE record_of_last_online > :1", time.mktime(time.gmtime()) - DIFF_TIME)
+        
+        if not cur_query or cur_query.count(2) < 2:
             return
         else:
-            buildGame([cur_query[0].record_of_uid, cur_query[1].record_of_uid])
-            #cur_query[0].delete()
-            #cur_query[0].delete()
-            self.response.out.write('OK')
-            #self.redirect('/game', True)
+            for player in cur_query:
+                if player != cur_player_record and not player.record_of_game_id: 
+                    cur_game = buildGame(list((cur_player_record.record_of_uid, player.record_of_uid)))
+                    #cur_player_record.delete()
+                    cur_player_record.record_of_game_id = cur_game
+                    cur_player_record.put()
+                    player.record_of_game_id = cur_game
+                    player.put()
+                    #cur_query[0].delete()
+                    #cur_query[0].delete()
+                    self.response.out.write('OK')
+                    #self.redirect('/game', True)
+                    return
+            else:
+                self.error(333)
+        
         
 
 application = webapp.WSGIApplication([('/', MainPage),
