@@ -25,6 +25,7 @@ $(document).ready(function () {
 		$(this).css({'background-color': 'white'})}, 
 		function() {$(this).css({'background-color': 'yellow'})})
 	.click({player: curPlayer}, function(data, event) {
+		$td = $(this);
 		if(gameEnded) {
 			$(this).unbind('click');
 			return false;
@@ -34,12 +35,12 @@ $(document).ready(function () {
 		var yCoord = Math.floor(data['clientY'] / $(this).innerHeight()); 
 		$.post('gameprocess', {x : ''+xCoord, y : ''+yCoord}, function(data) {
 			var cannotExp = /cannot/;
-			if(caExp.test(data)){
+			if(cannotExp.test(data)){
 				return;
 			}
 			else {
 				var xExp = /X/;
-				(xExp.test(data)) ? $(this).text('X') : $(this).text('O');
+				(xExp.test(data)) ? $td.text('X') : $td.text('O');
 				var notendedExp = /not_ended/;
 				if(notendedExp.test(data)){
 					
