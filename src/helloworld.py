@@ -10,7 +10,7 @@ import player
 import random
 import time
 
-DIFF_TIME = 600
+DIFF_TIME = 10
 
 class MainPage(webapp.RequestHandler):
     def get(self):
@@ -34,24 +34,28 @@ def buildGame(players_ids):
         curent_game_record = game.GameRecord()
         curent_game_record.pack(curent_game)
         curent_game_record.put()
+        return curent_game.game_id
         
 
 class OnlineChecker(webapp.RequestHandler):
     def post(self):
-        if self.request.get('online') != 0:
+        if int(self.request.get('online')) != 1:
+            #self.error(300)
             return
-        cur_uid = self.request.cookies.get('uid', None)
+        
+        cur_uid = int(self.request.cookies.get('uid', None))
         if cur_uid:
             #self.request.error(404)
             cur_query = db.GqlQuery("SELECT * FROM PlayerRecord " + 
                 "WHERE record_of_uid = :1", cur_uid)
             cur_player_record = cur_query.get()
             if not cur_player_record:
+                #self.error(301)
                 return
-            cur_player_record.record_last_online = time.mktime(time.gmtime())
+            cur_player_record.record_of_last_online = time.mktime(time.gmtime())
             cur_player_record.put()
         else:
-            #self.request.error(404)
+            #self.error(300)
             pass
             
 
@@ -62,7 +66,11 @@ class GamePage(webapp.RequestHandler):
         cur_record_player = player.PlayerRecord()
         cur_record_player.pack(cur_player)
         cur_record_player.put()
-        #self.response.cookies['uid'] = cur_player.uid
+        self.response.headers.add_header(
+        'Set-Cookie', 
+        'uid=%s; expires=Fri, 31-Dec-2020 23:59:59 GMT' \
+          % (cur_player.uid))
+        
         self.response.headers['Content-Type'] = 'text/plain'
         self.response.out.write('number ' + str(db.GqlQuery("SELECT * FROM PlayerRecord").count()))
         
@@ -90,8 +98,20 @@ class TestPage(webapp.RequestHandler):
                                 "WHERE record_of_last_online > :1", time.mktime(time.gmtime()) - DIFF_TIME):
             self.response.out.write('Name is ' + str(q.record_of_name) + '<br>')
             self.response.out.write('Uid is ' + str(q.record_of_uid) + '<br>')
-            self.response.out.write('Last online is ' + str(q.record_of_last_online))
-       
+            self.response.out.write('Last online is ' + str(q.record_of_last_online) + '<br>')
+            
+        self.response.out.write("=" * 90 + "<br>")
+        cur_uid = int(self.request.cookies.get('uid', None))
+        self.response.out.write('Cur user in cookies is ' + str(cur_uid) + '<br>')
+        if cur_uid:
+            cur_query = db.GqlQuery("SELECT * FROM PlayerRecord " + 
+                "WHERE record_of_uid = :1", cur_uid)
+            cur_player_record = cur_query.get()
+            self.response.out.write('Name is ' + str(cur_player_record.record_of_name) + '<br>')
+            self.response.out.write('Uid is ' + str(cur_player_record.record_of_uid) + '<br>')
+            self.response.out.write('Last online is ' + str(cur_player_record.record_of_last_online) + '<br>')
+        else:
+            self.response.out.write("No such user")
         
     def post(self):
         self.response.headers['Content-Type'] = 'text/plain'
@@ -108,8 +128,8 @@ class GameStart(webapp.RequestHandler):
             return
         else:
             buildGame([cur_query[0].record_of_uid, cur_query[1].record_of_uid])
-            cur_query[0].delete()
-            cur_query[0].delete()
+            #cur_query[0].delete()
+            #cur_query[0].delete()
             self.response.out.write('OK')
             #self.redirect('/game', True)
         
