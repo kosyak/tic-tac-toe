@@ -45,7 +45,7 @@ class TheGame:
             return False
         self.number_of_turns += 1
         self.board[x][y] = self.turn
-        self.turn ^= 1
+        self.turn = 1 - self.turn
         self.checkForEnd()
         return True
     

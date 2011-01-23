@@ -143,7 +143,10 @@ class TestPage(webapp.RequestHandler):
         for q in db.GqlQuery("SELECT * FROM GameRecord"):
             self.response.out.write('GameId is '+ str(q.record_of_game_id) + '<br>')
             self.response.out.write('First player uid is '+ str(q.record_first_player_uid) + '<br>')
-            self.response.out.write('Second player uid is '+ str(q.record_second_player_uid) + '<br><br>')
+            self.response.out.write('Second player uid is '+ str(q.record_second_player_uid) + '<br>')
+            self.response.out.write('Curent turn is '+ str(q.record_of_turn) + '<br>')
+            self.response.out.write('<br>')
+            
             
         
     def post(self):
@@ -208,8 +211,11 @@ class GameProcess(webapp.RequestHandler):
         if cur_game.turn == 0 and cur_game.first_player_uid == player_id or\
            cur_game.turn == 1 and cur_game.second_player_uid == player_id:
             can_move = cur_game.makeMove(x, y)
+            cur_game_record.pack(cur_game)
+            cur_game_record.put()
             if not can_move:
                 self.response.out.write('cannot')
+                
                 return
             self.response.out.write('can ')
             self.response.out.write(' ' + ('X' if cur_game.turn else 'O') + ' ')
@@ -219,6 +225,8 @@ class GameProcess(webapp.RequestHandler):
                 self.response.out.write(' not_ended')
         else:
             self.response.out.write('cannot')
+        
+        
             
             
 
