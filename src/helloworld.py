@@ -188,14 +188,19 @@ class GameProcess(webapp.RequestHandler):
     def post(self):
         game_id = getGameIdByRequest(self.request)
         player_id = getUserIdByRequest(self.request)
-        cur_game_record = db.GqlQuery("SELECT * FROM GameRecord WHERE record_of_game_id = :1", game_id) 
+        cur_game_record = db.GqlQuery("SELECT * FROM GameRecord WHERE record_of_game_id = :1", game_id).get() 
         cur_game = cur_game_record.unPack()
         x = self.request.get('x')
         y = self.request.get('y')
         if cur_game.turn == 0 and cur_game.first_player_uid == player_id or\
            cur_game.turn == 1 and cur_game.second_player_uid == player_id:
-            self.response.write.out('can ') 
-            cur_game.makeMove(x, y)
+             
+            can_move = cur_game.makeMove(x, y)
+            if not can_move:
+                self.response.write.out('cannot')
+                return
+            self.response.write.out('can ')
+            self.response.write.out(' ' + ('X' if cur_game.turn else 'O') + ' ')
             if cur_game.is_ended:
                 self.response.write.out(' ended ' + cur_game.getWinningString())
             else:
