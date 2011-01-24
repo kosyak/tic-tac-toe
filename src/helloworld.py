@@ -257,6 +257,11 @@ class GameStatus(webapp.RequestHandler):
             self.error(301)
             return  
         cur_game = cur_game_record.unPack()
+        opponent = db.GqlQuery("SELECT * FROM PlayerRecord WHERE record_of_uid = :1", cur_game.first_player_uid + cur_game.second_player_uid - player_id).get()
+        if opponent.record_of_last_online < time.mktime(time.gmtime() - DIFF_TIME):
+            self.response.out.write('opponent_offline') 
+            return
+        
         if cur_game.turn == 0 and cur_game.first_player_uid == player_id or\
            cur_game.turn == 1 and cur_game.second_player_uid == player_id:
                 if cur_game.is_ended:
@@ -269,11 +274,6 @@ class GameStatus(webapp.RequestHandler):
                 else:
                     self.response.out.write('not_move')
                 
-        
-        
-
-            
-
 application = webapp.WSGIApplication([('/', MainPage),
                                       (r'/[G,g]ame', GamePage),
                                       (r'/[T,t]est', TestPage),
