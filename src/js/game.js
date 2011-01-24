@@ -1,3 +1,42 @@
+jQuery.switchStatus = function(oldStatus, newStatus) {
+	newStatus = newStatus.split(' ')[0];
+	if(oldStatus == newStatus) return oldStatus;
+	var $info = $('#info');
+	$info.fadeOut('fast', function() {
+		switch (newStatus) {
+			case 'lose':
+				$info.text('You lose');
+				$.setWinCells(newStatus);
+				break;
+			case 'move':
+				$info.text('Your turn');
+				break;
+			case 'win':
+				$info.text('You won');
+				$.setWinCells(newStatus);
+				break;
+			case 'not_move':
+				$info.text("Opponent's turn");
+				break;
+			case 'opponent_offline':
+				$info.text("Opponent is offline");
+				break;
+		}
+		$info.fadeIn('fast');
+	});
+	return newStatus;
+};
+
+jQuery.setWinCells = function(winString) {
+	winString = winString.split(' ');
+	while(winString.length > 0 && isNaN(parseInt(winString[0]))) winString.splice(0,1);
+	var $this;
+	for (var i = 0; i < winString.length/2; ++i) {
+		$this = $('#gametable > table > tbody > tr:eq(' + (parseInt(winString[2*i+1])) + ') > td:eq(' + (parseInt(winString[2*i])) + ')');
+		$this.css({'color' : 'red'});
+	}
+};
+
 $(document).ready(function () {
 	var size = 5;
 	var $tbody = $('tbody');
@@ -11,53 +50,13 @@ $(document).ready(function () {
 });
 
 $(document).ready(function () {
-	GAME_MODES = ['lose', 'move', 'win', 'not_move', 'opponent_offline', 'no_status'];
-
 	var gameEnded = false;
 	var curPlayer = $.cookie("playerNumber");
 	var gameStatus = 'no_status';
 	
-	var switchStatus = function(newStatus) {
-		newStatus = newStatus.split(' ')[0];
-		if(gameStatus == newStatus) return;
-		var $info = $('#info');
-		$info.fadeOut('fast');
-		switch (newStatus) {
-			case 'lose':
-				$info.text('You lose');
-				setWinCells(newStatus);
-				break;
-			case 'move':
-				$info.text('Your turn');
-				break;
-			case 'win':
-				$info.text('You won');
-				setWinCells(newStatus);
-				break;
-			case 'not_move':
-				$info.text("Opponent's turn");
-				break;
-			case 'opponent_offline':
-				$info.text("Opponent is offline");
-			break;
-		}
-		$info.fadeIn('fast');
-		gameStatus = newStatus;
-	};
-	
-	var setWinCells = function(winString) {
-		winString = winString.split(' ');
-		while(isNaN(parseInt(winString[0]))) winString.splice(0,1);
-		var $this;
-		for (var i = 0; i < winString.length/2; ++i) {
-			$this = $('#gametable > table > tbody > tr:eq(' + (parseInt(winString[2*i+1])) + ') > td:eq(' + (parseInt(winString[2*i])) + ')');
-			$this.css({'color' : 'red'});
-		}
-	};
-	
 	var setMode = function() {
     	$.post('gamestatus', {}, function(data) {
-			switchStatus(data);
+			gameStatus = $.switchStatus(gameStatus, data);
 		});
 	};
 
@@ -99,7 +98,7 @@ $(document).ready(function () {
 				return;
 			}
 			else {
-				switchStatus (gameStatus, 'not_move');
+				gameStatus = $.switchStatus (gameStatus, 'not_move');
 				var xExp = /X/;
 				(xExp.test(data)) ? $td.text('X') : $td.text('O');
 				var notendedExp = /not_ended/;
@@ -108,7 +107,7 @@ $(document).ready(function () {
 				}
 				else {
 					gameEnded = true;
-					setWinCells(data);
+					$.setWinCells(data);
 				}
 			}
 		});
