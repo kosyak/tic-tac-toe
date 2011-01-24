@@ -1,29 +1,3 @@
-function setStatus(old_status, new_status) {
-	if(old_status == new_status) return;
-	$info = $('#info');
-	$info.fadeOut('fast');
-	switch (new_status) {
-		case 'lose':
-			$info.text('You lose');
-		break;
-		case 'move':
-			$info.text('Your turn');
-		break;
-		case 'win':
-			$info.text('You won');
-		break;
-		case 'not_move':
-			$info.text("Opponent's turn");
-		break;
-		case 'opponent_offline':
-			$info.text("Opponent is offline");
-		break;
- 	}
-	$info.fadeIn('fast');
-	old_status = new_status;
-	return old_status;
-};
-
 $(document).ready(function () {
 	var size = 5;
 	var $tbody = $('tbody');
@@ -37,18 +11,44 @@ $(document).ready(function () {
 });
 
 $(document).ready(function () {
+	GAME_MODES = ['lose', 'move', 'win', 'not_move', 'opponent_offline', 'no_status'];
+
 	var gameEnded = false;
 	var curPlayer = $.cookie("playerNumber");
-	var status = '';
+	var gameStatus = 'no_status';
 	
-	$.post('gamestatus', {}, function(data) {
-		status = setStatus(status, data);
-	    setInterval(function() {
-    		$.post('gamestatus', {}, function(data) {
-			status = setStatus(status, data);
+	var setMode = function() {
+    	$.post('gamestatus', {}, function(data) {
+			if(gameStatus == data) return;
+			$info = $('#info');
+			$info.fadeOut('fast');
+			switch (data) {
+				case 'lose':
+					$info.text('You lose');
+					break;
+				case 'move':
+					$info.text('Your turn');
+					break;
+				case 'win':
+					$info.text('You won');
+					break;
+				case 'not_move':
+					$info.text("Opponent's turn");
+					break;
+				case 'opponent_offline':
+					$info.text("Opponent is offline");
+				break;
+			}
+			$info.fadeIn('fast');
+			gameStatus = data;
 		});
-	}, 1000)
-	});
+		//return new_status;
+	};
+
+/*	$.post('gamestatus', {}, function(data) {
+		gameStatus = setMode(gameStatus, data);
+	});*/
+	setInterval(setMode, 2000);
 	
     setInterval(function() {
       $.post('onlinechecker', {online: '1'}, function(data) {
@@ -75,10 +75,9 @@ $(document).ready(function () {
 			$(this).unbind('click');
 			return false;
 			}
-//		var delta = 
-		var xCoord = Math.floor((data['clientX']/* - $(this).parent().css(''))*/) / $(this).innerWidth());
-		var yCoord = Math.floor(data['clientY'] / $(this).innerHeight()); 
-		$('#error').fadeIn('fast').text('x='+xCoord+' y='+yCoord);
+		var xCoord = Math.floor((data['layerX']) / $(this).outerWidth());
+		var yCoord = Math.floor((data['layerY']) / $(this).outerHeight()); 
+		//$('#error').fadeIn('fast').text('x='+xCoord+' y='+yCoord);
 		$.post('gameprocess', {x : ''+xCoord, y : ''+yCoord}, function(data) {
 			var cannotExp = /cannot/;
 			if(cannotExp.test(data)){
@@ -93,8 +92,8 @@ $(document).ready(function () {
 				}
 				else {
 					gameEnded = true;
-					$('body').append('<p id="info"></p>');
-					$('#info').text('Game is Enede').fadeIn('slow');
+					//$('body').append('<p id="info"></p>');
+					//$('#info').text('Game is Enede').fadeIn('slow');
 				}
 			}
 		});
