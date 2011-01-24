@@ -17,37 +17,51 @@ $(document).ready(function () {
 	var curPlayer = $.cookie("playerNumber");
 	var gameStatus = 'no_status';
 	
+	var switchStatus = function(newStatus) {
+		newStatus = newStatus.split(' ')[0];
+		if(gameStatus == newStatus) return;
+		var $info = $('#info');
+		$info.fadeOut('fast');
+		switch (newStatus) {
+			case 'lose':
+				$info.text('You lose');
+//				setWinCells(newStatus);
+				break;
+			case 'move':
+				$info.text('Your turn');
+				break;
+			case 'win':
+				$info.text('You won');
+//				setWinCells(newStatus);
+				break;
+			case 'not_move':
+				$info.text("Opponent's turn");
+				break;
+			case 'opponent_offline':
+				$info.text("Opponent is offline");
+			break;
+		}
+		$info.fadeIn('fast');
+		gameStatus = newStatus;
+	};
+	
+	var setWinCells = function(winString) {
+		winString = winString.split(' ');
+		while(isNaN(parseInt(winString[0]))) winString.splice(0,1);
+		var $this;
+		for (var i = 0; i < winString.length/2; ++i) {
+			$this = $('#gametable > table > tbody > tr:eq(' + (parseInt(winString[2*i+1])) + ') > td:eq(' + (parseInt(winString[2*i])) + ')');
+			$this.css({'color' : 'red'});
+		}
+	};
+	
 	var setMode = function() {
     	$.post('gamestatus', {}, function(data) {
-			if(gameStatus == data) return;
-			$info = $('#info');
-			$info.fadeOut('fast');
-			switch (data) {
-				case 'lose':
-					$info.text('You lose');
-					break;
-				case 'move':
-					$info.text('Your turn');
-					break;
-				case 'win':
-					$info.text('You won');
-					break;
-				case 'not_move':
-					$info.text("Opponent's turn");
-					break;
-				case 'opponent_offline':
-					$info.text("Opponent is offline");
-				break;
-			}
-			$info.fadeIn('fast');
-			gameStatus = data;
+			switchStatus(data);
 		});
-		//return new_status;
 	};
 
-/*	$.post('gamestatus', {}, function(data) {
-		gameStatus = setMode(gameStatus, data);
-	});*/
+//	setMode();
 	setInterval(setMode, 2000);
 	
     setInterval(function() {
@@ -59,8 +73,9 @@ $(document).ready(function () {
 	
 	setInterval(function() {
 		$.post('gamerepaint', {}, function(data) {
+			var $this;
 			if(data) {
-				a = data.split(' ');
+				var a = data.split(' ');
 				$this = $('#gametable > table > tbody > tr:eq('+(parseInt(a[2]))+') > td:eq('+(parseInt(a[1]))+')');
 				$this.text(a[0]);
 			}
@@ -70,7 +85,7 @@ $(document).ready(function () {
 		$(this).css({'background-color': 'white'})}, 
 		function() {$(this).css({'background-color': 'yellow'})})
 	.click({player: curPlayer}, function(data, event) {
-		$td = $(this);
+		var $td = $(this);
 		if(gameEnded) {
 			$(this).unbind('click');
 			return false;
@@ -84,6 +99,7 @@ $(document).ready(function () {
 				return;
 			}
 			else {
+				switchStatus (gameStatus, 'not_move');
 				var xExp = /X/;
 				(xExp.test(data)) ? $td.text('X') : $td.text('O');
 				var notendedExp = /not_ended/;
@@ -92,8 +108,7 @@ $(document).ready(function () {
 				}
 				else {
 					gameEnded = true;
-					//$('body').append('<p id="info"></p>');
-					//$('#info').text('Game is Enede').fadeIn('slow');
+					setWinCells(data);
 				}
 			}
 		});
