@@ -24,6 +24,7 @@ $(document).ready(function() {
   })}, 7000);*/
   
   $('#login form > input[type="submit"]').click(function() {
+  	if ($('#name').val() == '') return false;
     setInterval(function() {
       $.post('onlinechecker', {online: '1'}, function(data) {});
     }, 5000);
