@@ -16,7 +16,7 @@ jQuery.switchStatus = function(oldStatus, newStatus) {
 				$.setWinCells(newStatus);
 				break;
 			case 'not_move':
-				$info.text("Opponent's turn");
+				$info.text("Waiting for...");
 				break;
 			case 'opponent_offline':
 				$info.text("Opponent is offline");
@@ -53,30 +53,43 @@ $(document).ready(function () {
 	var gameEnded = false;
 	var curPlayer = $.cookie("playerNumber");
 	var gameStatus = 'no_status';
-	var isYourTurn = false;
+	var hasRepainted = false;
+	
+	var isYourTurn = function() {
+		return (gameStatus == 'move');
+	};
 
 	var setMode = function() {
     	$.post('gamestatus', function(data) {
 			gameStatus = $.switchStatus(gameStatus, data);
 		}); 
 	};
-	setInterval(setMode, 2000);
+//	setInterval(setMode, 2000);
+	setMode();
 	
     setInterval(function() {
       $.post('onlinechecker', {online: '1'});
 	}, 5000);
 	
 	setInterval(function() {
-		$.post('gamerepaint', {}, function(data) {
-			var $this;
-			if(data) {
-				a = data.split(' ');
-				var a = data.split(' ');
-				$this = $('#gametable > table > tbody > tr:eq('+(parseInt(a[2]))+') > td:eq('+(parseInt(a[1]))+')');
-				$this.text(a[0]);
-			}
+		if(gameStatus != 'not_move') return;
+		$.post('gamestatus', {}, function(data) {
+			var status_data = data;
+			if(data == 'not_move' || hasRepainted) return;
+//			gameStatus = $.switchStatus(gameStatus, data);
+		   	$.post('gamerepaint', function(data) {
+				if(data) {
+					hasRepainted = true;
+					a = data.split(' ');
+					var a = data.split(' ');
+					var $this;
+					$this = $('#gametable > table > tbody > tr:eq('+(parseInt(a[2]))+') > td:eq('+(parseInt(a[1]))+')');
+					$this.text(a[0]);
+					gameStatus = $.switchStatus(gameStatus, status_data);
+				}
+			}); 
 		});
-	}, 3000);
+	}, 2000);
 	
 	$('td').hover(function () {
 		$(this).css({'background-color': 'white'})}, 
@@ -87,7 +100,7 @@ $(document).ready(function () {
 		if(gameEnded) {
 			$(this).unbind('click');
 			return false;
-			}
+		}
 		var xCoord = Math.floor((data['layerX']) / $(this).outerWidth());
 		var yCoord = Math.floor((data['layerY']) / $(this).outerHeight()); 
 		$.post('gameprocess', {x : ''+xCoord, y : ''+yCoord}, function(data) {
@@ -96,18 +109,17 @@ $(document).ready(function () {
 				return;
 			}
 			else {
-
 				gameStatus = $.switchStatus (gameStatus, 'not_move');
 				var xExp = /X/;
 				(xExp.test(data)) ? $td.text('X') : $td.text('O');
 				var notendedExp = /not_ended/;
-				if(notendedExp.test(data)){
-					
-				}
+				if(notendedExp.test(data)){}
 				else {
 					gameEnded = true;
 					$.setWinCells(data);
 				}
+				setMode();
+				hasRepainted = false;
 			}
 		});
 		
