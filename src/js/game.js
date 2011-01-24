@@ -12,7 +12,7 @@ jQuery.switchStatus = function(oldStatus, newStatus) {
 				$info.text('Your turn');
 				break;
 			case 'win':
-				$info.text('You won');
+				$info.text('You win');
 				$.setWinCells(newStatus);
 				break;
 			case 'not_move':
@@ -50,52 +50,20 @@ $(document).ready(function () {
 });
 
 $(document).ready(function () {
-	GAME_MODES = ['lose', 'move', 'win', 'not_move', 'opponent_offline', 'no_status'];
-
 	var gameEnded = false;
 	var curPlayer = $.cookie("playerNumber");
 	var gameStatus = 'no_status';
+	var isYourTurn = false;
 
 	var setMode = function() {
-    	$.post('gamestatus', {}, function(data) {
-			if(gameStatus == data) return;
-			$info = $('#info');
-			$info.fadeOut('fast');
-			switch (data) {
-				case 'lose':
-					$info.text('You lose');
-					break;
-				case 'move':
-					$info.text('Your turn');
-					break;
-				case 'win':
-					$info.text('You won');
-					break;
-				case 'not_move':
-					$info.text("Opponent's turn");
-					break;
-				case 'opponent_offline':
-					$info.text("Opponent is offline");
-				break;
-			}
-			$info.fadeIn('fast');
-			gameStatus = data;
+    	$.post('gamestatus', function(data) {
 			gameStatus = $.switchStatus(gameStatus, data);
-		});
-		//return new_status;
+		}); 
 	};
-
-/*	$.post('gamestatus', {}, function(data) {
-		gameStatus = setMode(gameStatus, data);
-	});*/
-//	setMode();
 	setInterval(setMode, 2000);
 	
     setInterval(function() {
-      $.post('onlinechecker', {online: '1'}, function(data) {
-	  	if(data['otherPlayerOfflie']) {
-		    $('#offline').text('Other player is offline!').fadeIn('slow');
-		}});
+      $.post('onlinechecker', {online: '1'});
 	}, 5000);
 	
 	setInterval(function() {
@@ -108,7 +76,8 @@ $(document).ready(function () {
 				$this.text(a[0]);
 			}
 		});
-	}, 3000);				
+	}, 3000);
+	
 	$('td').hover(function () {
 		$(this).css({'background-color': 'white'})}, 
 		function() {$(this).css({'background-color': 'yellow'})})
@@ -121,7 +90,6 @@ $(document).ready(function () {
 			}
 		var xCoord = Math.floor((data['layerX']) / $(this).outerWidth());
 		var yCoord = Math.floor((data['layerY']) / $(this).outerHeight()); 
-		//$('#error').fadeIn('fast').text('x='+xCoord+' y='+yCoord);
 		$.post('gameprocess', {x : ''+xCoord, y : ''+yCoord}, function(data) {
 			var cannotExp = /cannot/;
 			if(cannotExp.test(data)){
@@ -138,8 +106,6 @@ $(document).ready(function () {
 				}
 				else {
 					gameEnded = true;
-					//$('body').append('<p id="info"></p>');
-					//$('#info').text('Game is Enede').fadeIn('slow');
 					$.setWinCells(data);
 				}
 			}
