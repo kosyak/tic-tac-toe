@@ -47,11 +47,29 @@ $(document).ready(function () {
 			}
 		$tr.appendTo($tbody);
 		}
+	var tableSize = {
+		width: size * $('td').outerWidth(),
+		height: size * $('td').outerHeight()
+	}; 
+	
+	$('#gametable > table').css({
+		'left' : 0.5*Math.max($(window).width() - tableSize.width, 0)+'px', 
+		'top' : 0.5*Math.max($(window).height() - tableSize.height, 100)+'px' 
+	});
+	
+	$('.info').css({
+		'position' : 'absolute',
+		'float' : 'none',
+		'text-align' : 'center',
+		'top' : (parseInt($('#gametable > table').css('top'))-50)+'px',
+		'width' : (tableSize.width + 40)+'px',
+		'left' : (parseInt($('#gametable > table').css('left')) - 20)+'px'
+	});
 });
 
 $(document).ready(function () {
 	var gameEnded = false;
-	var curPlayer = $.cookie("playerNumber");
+	var curPlayerChecker = '';
 	var gameStatus = 'no_status';
 	var hasRepainted = false;
 	
@@ -65,7 +83,11 @@ $(document).ready(function () {
 		}); 
 	};
 //	setInterval(setMode, 2000);
-	setMode();
+//	setMode();
+   	$.post('gamestatus', function(data) {
+		gameStatus = $.switchStatus(gameStatus, data);
+		(gameStatus == 'move') ? curPlayerChecker = 'X' : curPlayerChecker = 'O';
+	});	
 	
     setInterval(function() {
       $.post('onlinechecker', {online: '1'});
@@ -76,7 +98,7 @@ $(document).ready(function () {
 		$.post('gamestatus', {}, function(data) {
 			var status_data = data;
 			if(data == 'not_move' || hasRepainted) return;
-//			gameStatus = $.switchStatus(gameStatus, data);
+			//gameStatus = $.switchStatus(gameStatus, data);
 		   	$.post('gamerepaint', function(data) {
 				if(data) {
 					hasRepainted = true;
@@ -94,22 +116,30 @@ $(document).ready(function () {
 	$('td').hover(function () {
 		$(this).css({'background-color': 'white'})}, 
 		function() {$(this).css({'background-color': 'yellow'})})
-	.click({player: curPlayer}, function(data, event) {
-		$td = $(this);
+	.click(function(data, event) {
 		var $td = $(this);
 		if(gameEnded) {
 			$(this).unbind('click');
 			return false;
 		}
-		var xCoord = Math.floor((data['layerX']) / $(this).outerWidth());
-		var yCoord = Math.floor((data['layerY']) / $(this).outerHeight()); 
+		
+		// 'Quick-check' hack
+/*		if(gameStatus == 'move' && curPlayerChecker != '') {
+			gameStatus = $.switchStatus(gameStatus, 'not_move');
+			$td.text(curPlayerChecker);
+		};*/
+		// /'Quick-check' hack
+		
+		var xCoord = Math.floor((data['clientX'] - parseInt($('#gametable > table').css('left'))) / $td.outerWidth());
+		var yCoord = Math.floor((data['clientY'] - parseInt($('#gametable > table').css('top'))) / $td.outerHeight()); 
+//		$('#info').text('data[clientX]='+data['clientX']+' gametable='+parseInt($('#gametable > table').css('left')));
 		$.post('gameprocess', {x : ''+xCoord, y : ''+yCoord}, function(data) {
 			var cannotExp = /cannot/;
 			if(cannotExp.test(data)){
 				return;
 			}
 			else {
-				gameStatus = $.switchStatus (gameStatus, 'not_move');
+				gameStatus = $.switchStatus(gameStatus, 'not_move');
 				var xExp = /X/;
 				(xExp.test(data)) ? $td.text('X') : $td.text('O');
 				var notendedExp = /not_ended/;

@@ -8,8 +8,8 @@ table {
 	height: 300px;*/
 	position: absolute;
 	border-collapse: collapse;
-	padding-left: 0px;
-	padding-top: 0px;
+	margin-left: auto;
+	margin-top: auto;
 }
 
 td {
