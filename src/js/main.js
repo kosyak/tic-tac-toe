@@ -18,10 +18,10 @@ $(document).ready(function() {
                    });
   $('#throbber').css({'padding-left': ($('#login').width()*0.5-32)+'px'});
   
-  setInterval(function() {
+/*  setInterval(function() {
     $('#offline').fadeIn('slow', function() {
       $(this).delay(5000).fadeOut('slow');
-  })}, 7000);
+  })}, 7000);*/
   
   $('#login form > input[type="submit"]').click(function() {
     setInterval(function() {
@@ -43,15 +43,17 @@ $(document).ready(function() {
 	
 	setInterval(function () {
   		$.get('test', {}, function(data) {
-			$('#info').text(data).fadeIn('fast', function() {
+			/*$('#info').text(data).fadeIn('fast', function() {
 				$(this).delay(1500).fadeOut('fast');
-			});
+			});*/
 		});
   	}, 2000);
 	
 	$.post('game', {name : $('#name').val()}, function(data) {
-		$('#info').text(data).fadeIn('fast');
+		/*$('#info').text(data).fadeIn('fast'); */
 	});
     return false; 
   });
 });
+
+

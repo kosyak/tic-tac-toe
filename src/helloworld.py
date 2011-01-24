@@ -86,7 +86,7 @@ class GamePage(webapp.RequestHandler):
         self.response.out.write('number ' + str(db.GqlQuery("SELECT * FROM PlayerRecord").count()))
         
     def get(self):
-        path = os.path.join(os.path.dirname(__file__), r'html\game.html')
+        path = os.path.join(os.path.dirname(__file__), r'html/game.html')
         self.response.out.write(template.render(path, {}))
         #self.response.out.write(path)
         '''self.response.headers['Content-Type'] = 'text/plain'
