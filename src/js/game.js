@@ -1,3 +1,14 @@
+$.fn.textWidth = function(){
+	var sensor = $('<div />').css({
+		margin: 0,
+		padding: 0
+	});
+	$(this).append(sensor);
+	var width = sensor.width();
+	sensor.remove();
+	return width;
+}
+  
 jQuery.switchStatus = function(oldStatus, newStatus) {
 	newStatus = newStatus.split(' ')[0];
 	if(oldStatus == newStatus) return oldStatus;
@@ -54,17 +65,50 @@ $(document).ready(function () {
 	
 	$('#gametable > table').css({
 		'left' : 0.5*Math.max($(window).width() - tableSize.width, 0)+'px', 
-		'top' : 0.5*Math.max($(window).height() - tableSize.height, 100)+'px' 
+		'top' : 0.5*Math.max($(window).height() - tableSize.height, 200)+'px' 
 	});
 	
 	$('.info').css({
+		'white-space' : 'nowrap',
 		'position' : 'absolute',
+		'display' : 'inline',
 		'float' : 'none',
 		'text-align' : 'center',
 		'top' : (parseInt($('#gametable > table').css('top'))-50)+'px',
-		'width' : (tableSize.width + 40)+'px',
+		'width' : '',//(tableSize.width + 40)+'px',
 		'left' : (parseInt($('#gametable > table').css('left')) - 20)+'px'
 	});
+	$('#info').parent().css({
+		'width' : $(window).width()+'px'
+	});
+	
+	var fadeWidth = 150;
+	for (var xPos = 0; xPos < $('#info').parent().width(); xPos += 4) { 
+		var op = Math.max(0, (xPos - parseInt($('#gametable > table').css('left')) < 0) ? 1	
+			: 1 - (xPos - parseInt($('#gametable > table').css('left'))) / fadeWidth);
+		if(op == 0) continue;
+		$('<div></div>').css({ 
+			opacity: op, 
+			left: xPos,
+			top: 0,
+			height: parseInt($('#gametable > table').css('top')),
+			width: 4
+		}).addClass('fade-slice').appendTo($('#info').parent()); 
+	} 
+
+	for (var xPos = $('#info').parent().width()-4; xPos > 0; xPos -= 4) { 
+		var op = Math.max(0, (parseInt($('#gametable > table').css('left')) + $('#gametable > table').width() - xPos < 0) ? 1	
+			: 1 - (parseInt($('#gametable > table').css('left')) + $('#gametable > table').width() - xPos) / fadeWidth);
+		if(op == 0) continue;
+		$('<div></div>').css({ 
+			opacity: op, 
+			left: xPos,
+			top: 0,
+			height: parseInt($('#gametable > table').css('top')),
+			width: 4
+		}).addClass('fade-slice').appendTo($('#info').parent()); 
+	} 
+	
 });
 
 $(document).ready(function () {
@@ -86,8 +130,35 @@ $(document).ready(function () {
 //	setMode();
    	$.post('gamestatus', function(data) {
 		gameStatus = $.switchStatus(gameStatus, data);
-		(gameStatus == 'move') ? curPlayerChecker = 'X' : curPlayerChecker = 'O';
+		if (gameStatus == 'move') curPlayerChecker = 'X'; 
+		else if (gameStatus == 'not_move') curPlayerChecker = 'O';
 	});	
+	
+
+	var infoLoop = function() {
+//		if (parseInt($('#info').css('left')) < 0)
+			$('#info').css({
+				left: parseInt($('#gametable > table').css('left')) + $('#gametable > table').innerWidth()
+			});
+		var tt = $('#info').outerWidth();
+		$('#info').animate({
+			left: 0//parseInt($('#gametable > table').css('left'))-$('#info').textWidth()
+		}, {
+			easing : 'linear',
+			queue: false,
+			duration: 10000,
+			complete: infoLoop,
+/*			step : function(now, fx) {
+				$('#info').css({
+					width: Math.min($(window).width(), parseInt($('#info').css('left'))+$('info').textWidth())
+				});
+			}*/
+			
+		});
+	};
+	
+	jQuery.fx.interval = 10;
+	infoLoop();
 	
     setInterval(function() {
       $.post('onlinechecker', {online: '1'});
@@ -101,17 +172,17 @@ $(document).ready(function () {
 			//gameStatus = $.switchStatus(gameStatus, data);
 		   	$.post('gamerepaint', function(data) {
 				if(data) {
+					gameStatus = $.switchStatus(gameStatus, status_data);
 					hasRepainted = true;
 					a = data.split(' ');
 					var a = data.split(' ');
 					var $this;
 					$this = $('#gametable > table > tbody > tr:eq('+(parseInt(a[2]))+') > td:eq('+(parseInt(a[1]))+')');
 					$this.text(a[0]);
-					gameStatus = $.switchStatus(gameStatus, status_data);
 				}
 			}); 
 		});
-	}, 2000);
+	}, 3000);
 	
 	$('td').hover(function () {
 		$(this).css({'background-color': 'white'})}, 
@@ -124,10 +195,10 @@ $(document).ready(function () {
 		}
 		
 		// 'Quick-check' hack
-/*		if(gameStatus == 'move' && curPlayerChecker != '') {
+		if(gameStatus == 'move' && curPlayerChecker != '') {
 			gameStatus = $.switchStatus(gameStatus, 'not_move');
 			$td.text(curPlayerChecker);
-		};*/
+		};
 		// /'Quick-check' hack
 		
 		var xCoord = Math.floor((data['clientX'] - parseInt($('#gametable > table').css('left'))) / $td.outerWidth());

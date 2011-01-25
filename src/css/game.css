@@ -23,14 +23,15 @@ td {
 }
 
 .info {
-  display: none;
-  position: relative;
-  float: right;
-  background-color: green;
-  border: 1px solid black;
-  font-family: "Courier New";
-  font-size: 0.8em;
-  padding: 3px;  
+	margin: 0px;	
+	display: none;
+  	position: relative;
+  	float: right;
+/*  	background-color: green; */
+/*  	border: 1px solid black; */
+  	font-family: "Courier New";
+  	font-size: 1.8em;
+  	padding: 10px;  
 }
 
 
@@ -44,3 +45,11 @@ td {
   font-size: 0.8em;
   padding: 3px;  
 }
+
+.fade-slice { 
+	position: absolute; 
+	width: 2px; 
+/*	height: 2px; */ 
+	background: #fff; 
+	z-index: 3; 
+} 
