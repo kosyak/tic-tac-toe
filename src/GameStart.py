@@ -11,10 +11,12 @@ import game
 from gameConstants import DIFF_TIME 
 
 def buildGame(players_ids):
-        curent_game = game.TheGame(players_ids[0], players_ids[1])
+        curent_game = game.GameInstanse(players_ids[0], players_ids[1])
         curent_game_record = game.GameRecord()
         curent_game_record.pack(curent_game)
         curent_game_record.put()
+        if not db.GqlQuery("SELECT * FROM GameRecord WHERE record_of_game_id = :1", curent_game.game_id).get():
+            return None
         return curent_game.game_id
 
 class GameStart(webapp.RequestHandler):
@@ -24,7 +26,7 @@ class GameStart(webapp.RequestHandler):
                 "WHERE record_of_uid = :1", cur_uid)
         cur_player_record = cur_query.get()
         if not cur_player_record:
-            #self.error(111)
+            self.handle_exception('GET request to gamestart no such user', True)
             return 
         
         if cur_player_record.record_of_game_id:
@@ -40,12 +42,14 @@ class GameStart(webapp.RequestHandler):
         else:
             for player in cur_query:
                 if player.record_of_uid != cur_player_record.record_of_uid and not player.record_of_game_id:
-                    cur_player_record.record_of_game_id = 1635
-                    player.record_of_game_id = 1635
+                    cur_player_record.record_of_game_id = None
+                    player.record_of_game_id = None
                     cur_player_record.put()
                     player.put()
                     cur_game = buildGame(list((cur_player_record.record_of_uid, player.record_of_uid)))
                     #cur_player_record.delete()
+                    if cur_game == None:
+                        self.handle_exception("GET request to gamestart: error in gamecreating", True)
                     cur_player_record.record_of_game_id = cur_game
                     cur_player_record.put()
                     player.record_of_game_id = cur_game

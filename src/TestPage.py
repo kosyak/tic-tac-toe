@@ -30,7 +30,7 @@ class TestPage(webapp.RequestHandler):
             self.response.out.write('Name is ' + str(cur_player_record.record_of_name) + '<br>')
             self.response.out.write('Uid is ' + str(cur_player_record.record_of_uid) + '<br>')
             self.response.out.write('Last online is ' + str(cur_player_record.record_of_last_online) + '<br>')
-            q = db.GqlQuery("SELECT * FROM GameRecord WHERE record_of_game_id = :1", str(cur_player_record.record_of_game_id)).get()
+            q = db.GqlQuery("SELECT * FROM GameRecord WHERE record_of_game_id = :1", cur_player_record.record_of_game_id).get()
             '''   self.response.out.write('GameId is '+ str(q.record_of_game_id) + '<br>')
             self.response.out.write('First player uid is '+ str(q.record_first_player_uid) + '<br>')
             self.response.out.write('Second player uid is '+ str(q.record_second_player_uid) + '<br>')
@@ -39,15 +39,13 @@ class TestPage(webapp.RequestHandler):
             self.response.out.write('Is_ended is '+ str(q.record_of_is_ended) + '<br>')
             self.response.out.write('Winning string ' + str(q.unPack().getWinningString()) + '<br>')
             self.response.out.write('<br>')'''
-            self.response.out.write(q.unPack().toHtmlString())
+            if q:
+                self.response.out.write(str(q.unPack().toHtmlString()))
         else:
             self.response.out.write("No such user")
         self.response.out.write("=" * 90 + "<br>")
         for q in db.GqlQuery("SELECT * FROM GameRecord"):
-            self.response.out.write('GameId is '+ str(q.record_of_game_id) + '<br>')
-            self.response.out.write('First player uid is '+ str(q.record_first_player_uid) + '<br>')
-            self.response.out.write('Second player uid is '+ str(q.record_second_player_uid) + '<br>')
-            self.response.out.write('Curent turn is '+ str(q.record_of_turn) + '<br>')
+            #self.response.out.write(q.unPack().toHtmlString())
             self.response.out.write('<br>')
             
        

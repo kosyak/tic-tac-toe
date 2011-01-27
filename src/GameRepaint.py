@@ -3,6 +3,7 @@ Created on 27.01.2011
 
 @author: Rodion
 '''
+
 from google.appengine.ext import webapp
 from google.appengine.ext import db
 from game import getGameIdByRequest
@@ -12,7 +13,7 @@ class GameRepaint(webapp.RequestHandler):
     def post(self):
         game_id = getGameIdByRequest(self.request)
         player_id = getUserIdByRequest(self.request)
-        cur_game_record = db.GqlQuery("SELECT * FROM GameRecord WHERE record_of_game_id = :1", str(game_id)).get()
+        cur_game_record = db.GqlQuery("SELECT * FROM GameRecord WHERE record_of_game_id = :1", (game_id)).get()
         if not cur_game_record:
             self.error(301)
             return  

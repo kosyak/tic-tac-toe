@@ -6,8 +6,9 @@ Created on 21.01.2011
 
 from google.appengine.ext import db
 import random
-from gameConstants import SIZE_OF_BOARD 
-
+from gameConstants import SIZE_OF_BOARD
+import pickle 
+from re import MULTILINE
 
 def getGameIdByRequest(request):
     cur_uid = int(request.cookies.get('uid', None))
@@ -17,16 +18,15 @@ def getGameIdByRequest(request):
     if not cur_player_record:
         return None 
         
-    return cur_player_record.record_of_game_id
+    return int(cur_player_record.record_of_game_id)
             
 def getUserIdByRequest(request):
     return int(request.cookies.get('uid', None))
 
-
 def calcGameId(first_player_uid, second_player_uid): 
     return int((first_player_uid + second_player_uid) * random.random())
 
-class TheGame:
+class GameInstanse:
     '''
     Class realized game instance
     '''
@@ -110,43 +110,46 @@ class TheGame:
         return self.winning_string      
        
 class GameRecord(db.Model):
-    record_of_board = db.StringProperty(multiline=False)
-    record_first_player_uid = db.StringProperty(multiline=False)
-    record_second_player_uid = db.StringProperty(multiline=False)
-    record_of_game_id = db.StringProperty(multiline=False)
-    record_of_turn = db.StringProperty(multiline=False)
-    record_of_is_ended = db.StringProperty(multiline=False)
-    record_of_numner_of_turns = db.StringProperty(multiline=False)
-    record_of_last_move = db.StringProperty(multiline=False)
-    record_of_winning_string = db.StringProperty(multiline=False)
+    #record_of_board = db.StringProperty(multiline=False)
+    #record_first_player_uid = db.StringProperty(multiline=False)
+    #record_second_player_uid = db.StringProperty(multiline=False)
+    record_of_game_id = db.IntegerProperty()
+    pickle_dump = db.StringProperty(multiline = True)
+    #pickle_dump = db.TextProperty() 
+    
+    #record_of_turn = db.StringProperty(multiline=False)
+    #record_of_is_ended = db.StringProperty(multiline=False)
+    #record_of_numner_of_turns = db.StringProperty(multiline=False)
+    #record_of_last_move = db.StringProperty(multiline=False)
+    #record_of_winning_string = db.StringProperty(multiline=False)
     #def __init__(self, some_game):
-        #db.Model.__init__(self)
+    #    db.Model.__init__(self)
     def isFirstPlayer(self, uid):
-        return uid == int(self.record_first_player_uid)
+        return uid == self.unPack().first_player_uid
     def isSecondPlayer(self, uid):
-        return uid == int(self.record_second_player_uid)
+        return uid == self.unPack().second_player_uid
     def pack(self, some_game):
-        self.record_of_board = str(some_game.board)
-        self.record_first_player_uid = str(some_game.first_player_uid)
-        self.record_second_player_uid = str(some_game.second_player_uid)
-        self.record_of_game_id = str(some_game.game_id)
-        self.record_of_turn = str(some_game.turn)
-        self.record_of_is_ended = str(some_game.is_ended)
-        self.record_of_numner_of_turns = str(some_game.number_of_turns)
-        self.record_of_last_move = str(some_game.last_move)
-        self.record_of_winning_string = str(some_game.winning_string)
+        #self.record_of_board = str(some_game.board)
+        #self.record_first_player_uid = str(some_game.first_player_uid)
+        #self.record_second_player_uid = str(some_game.second_player_uid)
+        self.record_of_game_id = int(some_game.game_id)
+        self.pickle_dump = pickle.dumps(some_game)
+        #self.record_of_turn = str(some_game.turn)
+        #self.record_of_is_ended = str(some_game.is_ended)
+        #self.record_of_numner_of_turns = str(some_game.number_of_turns)
+        #self.record_of_last_move = str(some_game.last_move)
+        #self.record_of_winning_string = str(some_game.winning_string)
     def unPack(self):
-        curent_game = TheGame(0, 0)
-        curent_game.board = eval(self.record_of_board)
-        curent_game.first_player_uid = eval(self.record_first_player_uid)
-        curent_game.second_player_uid = eval(self.record_second_player_uid)
-        curent_game.game_id = eval(self.record_of_game_id)
-        curent_game.turn = eval(self.record_of_turn)
-        curent_game.is_ended = eval(self.record_of_is_ended)
-        curent_game.number_of_turns = eval(self.record_of_numner_of_turns)
-        curent_game.last_move = eval(self.record_of_last_move)
-        curent_game.winning_string = self.record_of_winning_string
+        curent_game = pickle.loads(str(self.pickle_dump))
+        #curent_game.board = eval(self.record_of_board)
+        #curent_game.first_player_uid = eval(self.record_first_player_uid)
+        #curent_game.second_player_uid = eval(self.record_second_player_uid)
+        #curent_game.game_id = eval(self.record_of_game_id)
+        #curent_game.turn = eval(self.record_of_turn)
+        #curent_game.is_ended = eval(self.record_of_is_ended)
+        #curent_game.number_of_turns = eval(self.record_of_numner_of_turns)
+        #curent_game.last_move = eval(self.record_of_last_move)
+        #curent_game.winning_string = self.record_of_winning_string
         return curent_game
         
         
-         

@@ -12,9 +12,9 @@ class GameProcess(webapp.RequestHandler):
     def post(self):
         game_id = getGameIdByRequest(self.request)
         player_id = getUserIdByRequest(self.request)
-        cur_game_record = db.GqlQuery("SELECT * FROM GameRecord WHERE record_of_game_id = :1", str(game_id)).get()
+        cur_game_record = db.GqlQuery("SELECT * FROM GameRecord WHERE record_of_game_id = :1", game_id).get()
         if not cur_game_record:
-            self.error(301)
+            self.handle_exception('POST request to gameprocess: no game with such game_id', True)
             return  
         cur_game = cur_game_record.unPack()
         x = int(self.request.get('x'))

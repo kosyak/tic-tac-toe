@@ -162,7 +162,7 @@ $(document).ready(function () {
 	
     setInterval(function() {
       $.post('onlinechecker', {online: '1'});
-	}, 5000);
+	}, 10000);
 	
 	setInterval(function() {
 		if(gameStatus != 'not_move') return;
