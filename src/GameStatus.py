@@ -26,6 +26,9 @@ class GameStatus(webapp.RequestHandler):
             self.response.out.write('opponent_offline') 
             return
         
+        #self.response.out.write(cur_game.getPlayerGameStatus(1 if cur_game.first_player_uid == player_id else 0))
+        #return
+        
         if cur_game.turn == 0 and cur_game.first_player_uid == player_id or\
            cur_game.turn == 1 and cur_game.second_player_uid == player_id:
                 if cur_game.is_ended:

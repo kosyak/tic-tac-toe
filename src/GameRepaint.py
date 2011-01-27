@@ -20,4 +20,5 @@ class GameRepaint(webapp.RequestHandler):
         cur_game = cur_game_record.unPack()
         if cur_game.last_move != None and cur_game.last_move[0] == 1 and cur_game.first_player_uid == player_id or\
            cur_game.last_move != None and cur_game.last_move[0] == 0 and cur_game.second_player_uid == player_id:
-            self.response.out.write(('X' if not cur_game.last_move[0] else 'O') + ' ' + str(cur_game.last_move[1]) + ' ' + str(cur_game.last_move[2]))
+            self.response.out.write(('X' if not cur_game.last_move[0] else 'O') + ' ' + str(cur_game.last_move[1]) + ' ' + str(cur_game.last_move[2]) + ' ')
+           # self.response.out.write(cur_game.getBoardString())

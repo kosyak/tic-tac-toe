@@ -3,6 +3,7 @@ Created on 27.01.2011
 
 @author: Rodion
 '''
+
 from google.appengine.ext import webapp
 from google.appengine.ext import db
 from game import getGameIdByRequest

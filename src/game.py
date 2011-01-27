@@ -7,8 +7,10 @@ Created on 21.01.2011
 from google.appengine.ext import db
 import random
 from gameConstants import SIZE_OF_BOARD
+from gameConstants import DIFF_TIME
 import pickle 
-from re import MULTILINE
+import time
+
 
 def getGameIdByRequest(request):
     cur_uid = int(request.cookies.get('uid', None))
@@ -41,7 +43,11 @@ class GameInstanse:
         self.winning_string = None
         self.last_move = None
         
-    def _getPlayerStatus(self, player_id):
+    def getPlayerGameStatus(self, player_id):
+        opponent = db.GqlQuery("SELECT * FROM PlayerRecord WHERE record_of_uid = :1", self.first_player_uid + self.second_player_uid - player_id).get()
+        if opponent.record_of_last_online < time.mktime(time.gmtime()) - DIFF_TIME:
+            return 'opponent_offline' 
+            
         if self.is_ended:
             if self.last_move[0] == player_id:
                 return "win " + self.getWinningString()
@@ -49,15 +55,15 @@ class GameInstanse:
                 return "lose " + self.getWinningString()
         else:
             if self.turn == player_id:
-                return "move"
+                return "moving " + self.getBoardString()
             else:
-                return "not_move"
+                return "waiting " + self.getBoardString()
             
     def getFirstPlayerGameStatus(self):
-        return self._getPlayerStatus(0)
+        return self.getPlayerGameStatus(0)
     
     def getSecondPlayerGameStatus(self):
-        return self._getPlayerStatus(1)
+        return self.getPlayerGameStatus(1)
             
     def __str__(self):
         return ("Game id is " + str(self.game_id) + "\n" +
@@ -95,6 +101,16 @@ class GameInstanse:
                         self.is_ended = True
                         return True
         return False
+
+    def getBoardString(self):
+        board_string = ""
+        for x in range(0, SIZE_OF_BOARD):
+            for y in range(0, SIZE_OF_BOARD):
+                if self.board[x][y] != None:
+                    board_string += ('X' if self.board[x][y] == 0 else 'O') + ' ' + str(x) + ' ' + str(y) + ','
+        if board_string[-1] == ',':
+            board_string = board_string[:-1]
+        return board_string
                     
     def makeMove(self, x, y):
         if self.board[x][y] != None:

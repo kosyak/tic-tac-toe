@@ -45,7 +45,7 @@ class TestPage(webapp.RequestHandler):
             self.response.out.write("No such user")
         self.response.out.write("=" * 90 + "<br>")
         for q in db.GqlQuery("SELECT * FROM GameRecord"):
-            #self.response.out.write(q.unPack().toHtmlString())
+            self.response.out.write(q.unPack().toHtmlString())
             self.response.out.write('<br>')
             
        
