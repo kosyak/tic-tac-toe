@@ -6,17 +6,30 @@ Created on 21.01.2011
 
 from google.appengine.ext import db
 import random
+from gameConstants import SIZE_OF_BOARD 
+
+
+def getGameIdByRequest(request):
+    cur_uid = int(request.cookies.get('uid', None))
+    cur_query = db.GqlQuery("SELECT * FROM PlayerRecord " + 
+               "WHERE record_of_uid = :1", cur_uid)
+    cur_player_record = cur_query.get()
+    if not cur_player_record:
+        return None 
+        
+    return cur_player_record.record_of_game_id
+            
+def getUserIdByRequest(request):
+    return int(request.cookies.get('uid', None))
+
 
 def calcGameId(first_player_uid, second_player_uid): 
     return int((first_player_uid + second_player_uid) * random.random())
-
-SIZE_OF_BOARD = 5
 
 class TheGame:
     '''
     Class realized game instance
     '''
-    
     def __init__(self, first_player_uid, second_player_uid):
         self.first_player_uid = first_player_uid
         self.second_player_uid = second_player_uid
@@ -27,6 +40,44 @@ class TheGame:
         self.board = [[None] * SIZE_OF_BOARD for i in range(0, SIZE_OF_BOARD)]
         self.winning_string = None
         self.last_move = None
+        
+    def _getPlayerStatus(self, player_id):
+        if self.is_ended:
+            if self.last_move[0] == player_id:
+                return "win " + self.getWinningString()
+            else:
+                return "lose " + self.getWinningString()
+        else:
+            if self.turn == player_id:
+                return "move"
+            else:
+                return "not_move"
+            
+    def getFirstPlayerGameStatus(self):
+        return self._getPlayerStatus(0)
+    
+    def getSecondPlayerGameStatus(self):
+        return self._getPlayerStatus(1)
+            
+    def __str__(self):
+        return ("Game id is " + str(self.game_id) + "\n" +
+                "First player id is " + str(self.first_player_uid) + "\n" +
+                "Second player id is " + str(self.second_player_uid) +  "\n" +
+                "Curent turn is " + str(self.turn) + "\n" + 
+                "Game is ended " + str(self.is_ended) + "\n" + 
+                "Winning string " + str(self.winning_string) + "\n" + 
+                "Last move " + str(self.last_move) + "\n"
+                )
+        
+    def toHtmlString(self):
+        return ("Game id is " + str(self.game_id) + "<br>" +
+                "First player id is " + str(self.first_player_uid) + "<br>" +
+                "Second player id is " + str(self.second_player_uid) +  "<br>" +
+                "Curent turn is " + str(self.turn) + "<br>" + 
+                "Game is ended " + str(self.is_ended) + "<br>" + 
+                "Winning string " + str(self.winning_string) + "<br>" + 
+                "Last move " + str(self.last_move) + "<br>"
+                )
         
     def checkForEnd(self):
         dx_list = [+1, +1,  0, -1]
@@ -67,8 +118,13 @@ class GameRecord(db.Model):
     record_of_is_ended = db.StringProperty(multiline=False)
     record_of_numner_of_turns = db.StringProperty(multiline=False)
     record_of_last_move = db.StringProperty(multiline=False)
+    record_of_winning_string = db.StringProperty(multiline=False)
     #def __init__(self, some_game):
         #db.Model.__init__(self)
+    def isFirstPlayer(self, uid):
+        return uid == int(self.record_first_player_uid)
+    def isSecondPlayer(self, uid):
+        return uid == int(self.record_second_player_uid)
     def pack(self, some_game):
         self.record_of_board = str(some_game.board)
         self.record_first_player_uid = str(some_game.first_player_uid)
@@ -78,6 +134,7 @@ class GameRecord(db.Model):
         self.record_of_is_ended = str(some_game.is_ended)
         self.record_of_numner_of_turns = str(some_game.number_of_turns)
         self.record_of_last_move = str(some_game.last_move)
+        self.record_of_winning_string = str(some_game.winning_string)
     def unPack(self):
         curent_game = TheGame(0, 0)
         curent_game.board = eval(self.record_of_board)
@@ -88,6 +145,7 @@ class GameRecord(db.Model):
         curent_game.is_ended = eval(self.record_of_is_ended)
         curent_game.number_of_turns = eval(self.record_of_numner_of_turns)
         curent_game.last_move = eval(self.record_of_last_move)
+        curent_game.winning_string = self.record_of_winning_string
         return curent_game
         
         
