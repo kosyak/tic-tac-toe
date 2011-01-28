@@ -9,7 +9,7 @@ from TestPage import TestPage
 from GameRepaint import GameRepaint
 from GameProcess import GameProcess
 from GameStatus import GameStatus
-
+from Playing import Playing
      
 application = webapp.WSGIApplication([('/', MainPage),
                                       (r'/[G,g]ame', GamePage),
@@ -18,7 +18,9 @@ application = webapp.WSGIApplication([('/', MainPage),
                                       ('/gamestart', GameStart),
                                       ('/gameprocess', GameProcess),
                                       ('/gamerepaint', GameRepaint),
-                                      ('/gamestatus', GameStatus)],
+                                      ('/gamestatus', GameStatus),
+                                      ('/gameprocess2', Playing)
+                                      ],
                                       debug=True)
 
 def main():

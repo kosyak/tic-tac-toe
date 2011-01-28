@@ -3,7 +3,7 @@ Created on 27.01.2011
 
 @author: Родион
 '''
-import os
+
 from google.appengine.ext import webapp
 from google.appengine.ext import db
 from game import getGameIdByRequest
@@ -19,6 +19,8 @@ class Playing(webapp.RequestHandler):
         if not mode:
             self.handle_exception('POST to playing: bad mode\n', True)
         game_id = getGameIdByRequest(self.request)
+        if db.GqlQuery("SELECT * FROM GameRecord WHERE record_of_game_id = :1", game_id).get() == None:
+            self.handle_exception("POST to playing: no game with such game_id", True)
         cur_game = db.GqlQuery("SELECT * FROM GameRecord WHERE record_of_game_id = :1", game_id).get().unPack()
         player_position = 0 if cur_game.isFirstPlayer(getUserIdByRequest(self.request)) else 1
         if mode == 'waiting':
@@ -29,6 +31,7 @@ class Playing(webapp.RequestHandler):
                     self.response.out.write(cur_game.getPlayerGameStatus(player_position))
                     return
                 time.sleep(DELAY_BETWEEN_PROCESSING)
+            self.response.out.write(cur_game.getPlayerGameStatus(player_position))
         elif mode == 'moving':
             cur_game = db.GqlQuery("SELECT * FROM GameRecord WHERE record_of_game_id =:1", game_id).get().unPack()
             if cur_game.turn != player_position:
@@ -45,7 +48,5 @@ class Playing(webapp.RequestHandler):
             self.response.out.write(cur_game.getPlayerGameStatus(player_position))
         else:
             pass
-     
 
-        
-        
+

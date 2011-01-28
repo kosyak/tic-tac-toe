@@ -15,16 +15,13 @@ class OnlineChecker(webapp.RequestHandler):
         
         cur_uid = int(self.request.cookies.get('uid', None))
         if cur_uid:
-            #self.request.error(404)
             cur_query = db.GqlQuery("SELECT * FROM PlayerRecord " + 
                 "WHERE record_of_uid = :1", cur_uid)
             cur_player_record = cur_query.get()
             if not cur_player_record:
-                #self.error(301)
                 return
             cur_player_record.record_of_last_online = time.mktime(time.gmtime())
             cur_player_record.put()
         else:
-            #self.error(300)
             pass
             
