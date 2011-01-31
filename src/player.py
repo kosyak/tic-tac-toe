@@ -13,19 +13,21 @@ def getUid(name):
         res = res * 239 + ord(ch)
         while res > 10**9 + 9:
             res -= 10**9 + 9
-    return int(random.random() * res) 
+    for i in range(0, 20):
+        res = res * 239 + random.choice(range(0, 255))
+        while res > 10**9 + 9:
+            res -= 10**9 + 9
+    return int(res) 
 
 class Player:
     '''
     Player class
     '''
-
     def __init__(self, name):
         self.name = name
         self.uid = getUid(name)
         self.last_online = time.mktime(time.gmtime())
         self.game_id = None
-       
 
 class PlayerRecord(db.Model):
     record_of_name = db.StringProperty(multiline=False)
