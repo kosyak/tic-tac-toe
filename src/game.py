@@ -59,6 +59,11 @@ class GameInstanse:
             else:
                 return "waiting " + self.getBoardString()
             
+    def isFirstPlayer(self, uid):
+        return uid == self.first_player_uid
+    def isSecondPlayer(self, uid):
+        return uid == self.second_player_uid
+    
     def getFirstPlayerGameStatus(self):
         return self.getPlayerGameStatus(0)
     

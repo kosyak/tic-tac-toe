@@ -19,14 +19,14 @@ jQuery.switchStatus = function(oldStatus, newStatus) {
 				$info.text('You lose');
 				$.setWinCells(newStatus);
 				break;
-			case 'move':
+			case 'moving':
 				$info.text('Your turn');
 				break;
 			case 'win':
 				$info.text('You win');
 				$.setWinCells(newStatus);
 				break;
-			case 'not_move':
+			case 'waiting':
 				$info.text("Waiting for...");
 				break;
 			case 'opponent_offline':
@@ -155,7 +155,7 @@ $(document).ready(function () {
 	var hasRepainted = false;
 	
 	$('td').bind( "drop", function(event, ui) {
-		if(gameStatus != 'move') return;
+		if(gameStatus != 'moving') return;
 		ui.helper.animate({
 			left: $(this).offset().left,
 			top: $(this).offset().top
@@ -165,20 +165,21 @@ $(document).ready(function () {
 	});
 	
 	var isYourTurn = function() {
-		return (gameStatus == 'move');
+		return (gameStatus == 'moving');
 	};
 
 	var setMode = function() {
-    	$.post('gamestatus', function(data) {
+    	$.post('gamestatus', {mode: 'ask'}, function(data) {
 			gameStatus = $.switchStatus(gameStatus, data);
 		}); 
 	};
 //	setInterval(setMode, 2000);
 //	setMode();
-   	$.post('gamestatus', function(data) {
+   	$.post('gameprocess2', {mode: 'ask'}, function(data) {
+		if(!data) return;
 		gameStatus = $.switchStatus(gameStatus, data);
-		if (gameStatus == 'move') curPlayerChecker = 'X'; 
-		else if (gameStatus == 'not_move') curPlayerChecker = 'O';
+		if (gameStatus == 'moving') curPlayerChecker = 'X'; 
+		else if (gameStatus == 'waiting') curPlayerChecker = 'O';
 		var $draggable = $('div:not(#error):hidden'); 
 		$draggable.addClass(style_check[curPlayerChecker]).fadeIn('slow');
 	});	
@@ -210,16 +211,16 @@ $(document).ready(function () {
 	infoLoop();
 	
     setInterval(function() {
-      $.post('onlinechecker', {online: '1'});
-	}, 10000);
+      $.post('gameprocess2', {mode: gameStatus, online: '1'});
+	}, 5000);
 	
 	setInterval(function() {
-		if(gameStatus != 'not_move') return;
-		$.post('gamestatus', {}, function(data) {
+		if(gameStatus != 'waiting') return;
+		$.post('gameprocess2', {mode: gameStatus}, function(data) {
 			var status_data = data;
-			if(data == 'not_move' || hasRepainted) return;
+			if(data == 'waiting' || hasRepainted) return;
 			//gameStatus = $.switchStatus(gameStatus, data);
-		   	$.post('gamerepaint', function(data) {
+		   	$.post('gameprocess2', {mode: gameStatus}, function(data) {
 				if(data) {
 					gameStatus = $.switchStatus(gameStatus, status_data);
 					hasRepainted = true;
@@ -253,13 +254,13 @@ $(document).ready(function () {
 		var xCoord = Math.floor((event['clientX'] - parseInt($('#gametable > table').css('left'))) / $td.outerWidth());
 		var yCoord = Math.floor((event['clientY'] - parseInt($('#gametable > table').css('top'))) / $td.outerHeight()); 
 //		$('#info').text('data[clientX]='+data['clientX']+' gametable='+parseInt($('#gametable > table').css('left')));
-		$.post('gameprocess', {x : ''+xCoord, y : ''+yCoord}, function(data) {
+		$.post('gameprocess2', {mode: gameStatus, x : ''+xCoord, y : ''+yCoord}, function(data) {
 			var cannotExp = /cannot/;
 			if(cannotExp.test(data)){
 				return;
 			}
 			else {
-				gameStatus = $.switchStatus(gameStatus, 'not_move');
+				gameStatus = $.switchStatus(gameStatus, 'waiting'); // it's a hack!
 				var xExp = /X/;
 				(xExp.test(data)) ? $td.addClass(style_check['X']) : $td.addClass(style_check['O']);
 				var notendedExp = /not_ended/;
