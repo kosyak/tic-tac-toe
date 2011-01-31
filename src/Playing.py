@@ -1,7 +1,7 @@
 '''
 Created on 27.01.2011
 
-@author: Родион
+@author: Rodion
 '''
 
 from google.appengine.ext import webapp

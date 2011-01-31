@@ -11,7 +11,6 @@ from gameConstants import DIFF_TIME
 import pickle 
 import time
 
-
 def getGameIdByRequest(request):
     cur_uid = int(request.cookies.get('uid', None))
     cur_query = db.GqlQuery("SELECT * FROM PlayerRecord " + 
