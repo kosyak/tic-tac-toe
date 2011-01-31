@@ -19,14 +19,14 @@ jQuery.switchStatus = function(oldStatus, newStatus) {
 				$info.text('You lose');
 				$.setWinCells(newStatus);
 				break;
-			case 'move':
+			case 'moving':
 				$info.text('Your turn');
 				break;
 			case 'win':
 				$info.text('You win');
 				$.setWinCells(newStatus);
 				break;
-			case 'not_move':
+			case 'waiting':
 				$info.text("Waiting for...");
 				break;
 			case 'opponent_offline':
@@ -54,7 +54,7 @@ $(document).ready(function () {
 	for(var i = 0; i<size; ++i) {
 		var $tr = $('<tr></tr>');
 		for(var j=0;j<size;++j) {
-			$('<td> </td>').appendTo($tr);
+			$('<td></td>').appendTo($tr);
 			}
 		$tr.appendTo($tbody);
 		}
@@ -108,30 +108,80 @@ $(document).ready(function () {
 			width: 4
 		}).addClass('fade-slice').appendTo($('#info').parent()); 
 	} 
-	
+	$('td').droppable({ 
+		accept: '.cross, .circle', 
+		hoverClass: 'drophover',
+		tolerance: 'pointer',
+/*		drop: function(event, ui) {
+		}*/
+	});
+});
+
+$(document).ready(function() {
+	var coords = [];
+	for(var i=0;i<5;++i) {
+		var flag = 0;
+		while(!flag) {
+			var x = Math.floor(Math.random() * (parseInt($('#gametable > table').css('left')) - $('td').outerWidth()));
+			if(Math.random() > 0.5)
+				x = $(window).width() - $('td').outerWidth() - x;
+			var y = Math.random() * ($(document).height() - $('td').outerHeight() - parseInt($('#gametable > table').css('top'))) 
+					+ parseInt($('#gametable > table').css('top'));
+			flag = 1;
+			for(var j=0;j<coords.length;++j) {
+				flag = flag && (Math.abs(x-coords[j].x)>$('td').outerWidth() || Math.abs(y-coords[j].y)>$('td').outerHeight()); 
+			} 
+		}
+		$elem =  $('<div></div>');
+		$elem.css({
+			left: x, 
+			top: y,
+			width: $('td').first().outerWidth(),
+			height: $('td').first().outerHeight(),
+			'background-color': 'transparent',
+			position: 'absolute',
+			display: 'none'
+		}).appendTo($('body'));
+		$elem.draggable();
+		coords.push({x:x,y:y});
+	}
 });
 
 $(document).ready(function () {
+	var style_check = {'X' : 'cross', 'O' : 'circle'};
 	var gameEnded = false;
 	var curPlayerChecker = '';
 	var gameStatus = 'no_status';
 	var hasRepainted = false;
 	
+	$('td').bind( "drop", function(event, ui) {
+		if(gameStatus != 'moving') return;
+		ui.helper.animate({
+			left: $(this).offset().left,
+			top: $(this).offset().top
+		}, 300);
+		$(this).trigger('click', event);
+		ui.helper.draggable("option", "disabled", true);
+	});
+	
 	var isYourTurn = function() {
-		return (gameStatus == 'move');
+		return (gameStatus == 'moving');
 	};
 
 	var setMode = function() {
-    	$.post('gamestatus', function(data) {
+    	$.post('gamestatus', {mode: 'ask'}, function(data) {
 			gameStatus = $.switchStatus(gameStatus, data);
 		}); 
 	};
 //	setInterval(setMode, 2000);
 //	setMode();
-   	$.post('gamestatus', function(data) {
+   	$.post('gameprocess2', {mode: 'ask'}, function(data) {
+		if(!data) return;
 		gameStatus = $.switchStatus(gameStatus, data);
-		if (gameStatus == 'move') curPlayerChecker = 'X'; 
-		else if (gameStatus == 'not_move') curPlayerChecker = 'O';
+		if (gameStatus == 'moving') curPlayerChecker = 'X'; 
+		else if (gameStatus == 'waiting') curPlayerChecker = 'O';
+		var $draggable = $('div:not(#error):hidden'); 
+		$draggable.addClass(style_check[curPlayerChecker]).fadeIn('slow');
 	});	
 	
 
@@ -161,16 +211,16 @@ $(document).ready(function () {
 	infoLoop();
 	
     setInterval(function() {
-      $.post('onlinechecker', {online: '1'});
-	}, 10000);
+      $.post('gameprocess2', {mode: gameStatus, online: '1'});
+	}, 5000);
 	
 	setInterval(function() {
-		if(gameStatus != 'not_move') return;
-		$.post('gamestatus', {}, function(data) {
+		if(gameStatus != 'waiting') return;
+		$.post('gameprocess2', {mode: gameStatus}, function(data) {
 			var status_data = data;
-			if(data == 'not_move' || hasRepainted) return;
+			if(data == 'waiting' || hasRepainted) return;
 			//gameStatus = $.switchStatus(gameStatus, data);
-		   	$.post('gamerepaint', function(data) {
+		   	$.post('gameprocess2', {mode: gameStatus}, function(data) {
 				if(data) {
 					gameStatus = $.switchStatus(gameStatus, status_data);
 					hasRepainted = true;
@@ -178,7 +228,7 @@ $(document).ready(function () {
 					var a = data.split(' ');
 					var $this;
 					$this = $('#gametable > table > tbody > tr:eq('+(parseInt(a[2]))+') > td:eq('+(parseInt(a[1]))+')');
-					$this.text(a[0]);
+					$this.addClass(style_check[a[0]]);
 				}
 			}); 
 		});
@@ -197,22 +247,22 @@ $(document).ready(function () {
 		// 'Quick-check' hack
 		if(gameStatus == 'move' && curPlayerChecker != '') {
 			gameStatus = $.switchStatus(gameStatus, 'not_move');
-			$td.text(curPlayerChecker);
+			$td.addClass(style_check[curPlayerChecker]);
 		};
 		// /'Quick-check' hack
 		
-		var xCoord = Math.floor((data['clientX'] - parseInt($('#gametable > table').css('left'))) / $td.outerWidth());
-		var yCoord = Math.floor((data['clientY'] - parseInt($('#gametable > table').css('top'))) / $td.outerHeight()); 
+		var xCoord = Math.floor((event['clientX'] - parseInt($('#gametable > table').css('left'))) / $td.outerWidth());
+		var yCoord = Math.floor((event['clientY'] - parseInt($('#gametable > table').css('top'))) / $td.outerHeight()); 
 //		$('#info').text('data[clientX]='+data['clientX']+' gametable='+parseInt($('#gametable > table').css('left')));
-		$.post('gameprocess', {x : ''+xCoord, y : ''+yCoord}, function(data) {
+		$.post('gameprocess2', {mode: gameStatus, x : ''+xCoord, y : ''+yCoord}, function(data) {
 			var cannotExp = /cannot/;
 			if(cannotExp.test(data)){
 				return;
 			}
 			else {
-				gameStatus = $.switchStatus(gameStatus, 'not_move');
+				gameStatus = $.switchStatus(gameStatus, 'waiting'); // it's a hack!
 				var xExp = /X/;
-				(xExp.test(data)) ? $td.text('X') : $td.text('O');
+				(xExp.test(data)) ? $td.addClass(style_check['X']) : $td.addClass(style_check['O']);
 				var notendedExp = /not_ended/;
 				if(notendedExp.test(data)){}
 				else {
