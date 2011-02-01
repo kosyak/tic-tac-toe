@@ -42,8 +42,8 @@ class GameInstanse:
         self.winning_string = None
         self.last_move = None
         
-    def getPlayerGameStatus(self, player_id):
-        player_uid = self.first_player_uid if player_id == 0 else self.second_player_uid 
+    def getPlayerGameStatus(self, player_position):
+        player_uid = self.first_player_uid if player_position == 0 else self.second_player_uid 
         opponent = db.GqlQuery("SELECT * FROM PlayerRecord WHERE record_of_uid = :1", player_uid).get()
         if not opponent:
             return 'PlayerRecord error'
@@ -51,12 +51,12 @@ class GameInstanse:
             return 'opponent_offline' 
             
         if self.is_ended:
-            if self.last_move[0] == player_id:
+            if self.last_move[0] == player_position:
                 return "win " + self.getWinningString()
             else:
                 return "lose " + self.getWinningString()
         else:
-            if self.turn == player_id:
+            if self.turn == player_position:
                 return "moving " + self.getBoardString()
             else:
                 return "waiting " + self.getBoardString()
@@ -79,7 +79,10 @@ class GameInstanse:
                 "Curent turn is " + str(self.turn) + "\n" + 
                 "Game is ended " + str(self.is_ended) + "\n" + 
                 "Winning string " + str(self.winning_string) + "\n" + 
-                "Last move " + str(self.last_move) + "\n"
+                "Last move " + str(self.last_move) + "\n" +
+                "Number of moves " + str(self.number_of_turns) + "\n" +
+                "First player status " + str(self.getFirstPlayerGameStatus()) + "\n" +
+                "Second player status " + str(self.getSecondPlayerGameStatus()) + "\n"
                 )
         
     def toHtmlString(self):
@@ -89,7 +92,10 @@ class GameInstanse:
                 "Curent turn is " + str(self.turn) + "<br>" + 
                 "Game is ended " + str(self.is_ended) + "<br>" + 
                 "Winning string " + str(self.winning_string) + "<br>" + 
-                "Last move " + str(self.last_move) + "<br>"
+                "Last move " + str(self.last_move) + "<br>" +
+                "Number of moves " + str(self.number_of_turns) + "<br>" +
+                "First player status " + str(self.getFirstPlayerGameStatus()) + "<br>" +
+                "Second player status " + str(self.getSecondPlayerGameStatus()) + "<br>"
                 )
         
     def checkForEnd(self):

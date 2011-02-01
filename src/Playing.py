@@ -48,11 +48,17 @@ class Playing(webapp.RequestHandler):
             self.response.out.write(cur_game.getPlayerGameStatus(player_position))
         elif mode == 'moving':
             cur_game = db.GqlQuery("SELECT * FROM GameRecord WHERE record_of_game_id =:1", game_id).get().unPack()
+            if not cur_game:
+                return "game_error"
             if cur_game.turn != player_position:
                 self.response.out.write(cur_game.getPlayerGameStatus(player_position))
                 return
             x = int(self.request.get('x'))
             y = int(self.request.get('y'))
+            query = db.GqlQuery("SELECT * FROM GameRecord WHERE record_of_game_id =:1", game_id)
+            for q in query:
+                q.delete()
+            
             cur_game.makeMove(x, y)
             cur_game_record = game.GameRecord()
             cur_game_record.pack(cur_game)
