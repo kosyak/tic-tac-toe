@@ -43,8 +43,8 @@ class GameInstanse:
         self.last_move = None
         
     def getPlayerGameStatus(self, player_id):
-        player_id = self.first_player_uid if player_id == 0 else self.second_player_uid 
-        opponent = db.GqlQuery("SELECT * FROM PlayerRecord WHERE record_of_uid = :1", player_id).get()
+        player_id_2 = self.first_player_uid if player_id == 0 else self.second_player_uid 
+        opponent = db.GqlQuery("SELECT * FROM PlayerRecord WHERE record_of_uid = :1", player_id_2).get()
         if not opponent:
             return 'PlayerRecord error'
         if opponent.record_of_last_online < time.mktime(time.gmtime()) - DIFF_TIME:
