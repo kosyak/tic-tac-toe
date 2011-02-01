@@ -17,6 +17,18 @@ from gameConstants import DELAY_BETWEEN_PROCESSING
 
 class Playing(webapp.RequestHandler):
     def post(self):
+        # Update last online 
+        cur_uid = int(self.request.cookies.get('uid', None))
+        if cur_uid:
+            cur_query = db.GqlQuery("SELECT * FROM PlayerRecord " + 
+                "WHERE record_of_uid = :1", cur_uid)
+            cur_player_record = cur_query.get()
+            if not cur_player_record:
+                return
+            cur_player_record.record_of_last_online = time.mktime(time.gmtime())
+            cur_player_record.put()
+        # Last online updated
+          
         mode = self.request.get('mode', None)
         if not mode:
             self.handle_exception('POST to playing: bad mode\n', True)
@@ -49,6 +61,8 @@ class Playing(webapp.RequestHandler):
         elif mode == 'ask':
             self.response.out.write(cur_game.getPlayerGameStatus(player_position))
         else:
-            pass
+            self.response.out.write(cur_game.getPlayerGameStatus(player_position))
+            
+            
 
 

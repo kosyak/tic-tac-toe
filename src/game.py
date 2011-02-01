@@ -43,7 +43,10 @@ class GameInstanse:
         self.last_move = None
         
     def getPlayerGameStatus(self, player_id):
-        opponent = db.GqlQuery("SELECT * FROM PlayerRecord WHERE record_of_uid = :1", self.first_player_uid + self.second_player_uid - player_id).get()
+        player_id = self.first_player_uid if player_id == 0 else self.second_player_uid 
+        opponent = db.GqlQuery("SELECT * FROM PlayerRecord WHERE record_of_uid = :1", player_id).get()
+        if not opponent:
+            return 'PlayerRecord error'
         if opponent.record_of_last_online < time.mktime(time.gmtime()) - DIFF_TIME:
             return 'opponent_offline' 
             
@@ -112,7 +115,7 @@ class GameInstanse:
             for y in range(0, SIZE_OF_BOARD):
                 if self.board[x][y] != None:
                     board_string += ('X' if self.board[x][y] == 0 else 'O') + ' ' + str(x) + ' ' + str(y) + ','
-        if board_string[-1] == ',':
+        if len(board_string) > 0 and board_string[-1] == ',':
             board_string = board_string[:-1]
         return board_string
                     
