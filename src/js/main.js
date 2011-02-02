@@ -1,32 +1,61 @@
 Array.prototype.xyInArray = function(elem) {
 	for (var i = 0; i < this.length; ++i) {
 		if (this[i].x == elem.x && this[i].y == elem.y) 
-			return true;
+			return i;
 	}
-	return false;
+	return -1;
 }
 
 $(document).ready(function() {
-	var coords = [];
 	var cellSize = 150;
-	for (var i = 0; i < 5; ++i) {
+	var coords = [];
+	
+	var imageBlinking = function($img) {
+		$img.delay(2000+Math.floor(Math.random()*5000)).fadeIn('slow', function() {
+			$img.delay(2000+Math.floor((1-Math.random())*5000)).fadeOut('slow', function () {
+				var index = 0;/* coords.xyInArray({
+					x: parseInt($img.css('left')),
+					y: parseInt($img.css('top'))
+				});*/
+				var date = new Date();
+				while (coords.xyInArray({x: parseInt($img.css('left')), y: parseInt($img.css('top'))}) != -1) {
+					$img.css({
+						'left': cellSize * Math.floor(Math.random() * ($(document).width() - cellSize) / cellSize),
+						'top':  cellSize * Math.floor(Math.random() * ($(document).height() - cellSize) / cellSize),
+						'background-image': ((date.getMilliseconds() % 2 == 1) ? 'url(../img/cross.png)' : 'url(../img/circle.png)')
+					});
+				}
+				coords.splice(index, 1, {
+					x: parseInt($img.css('left')),
+					y: parseInt($img.css('top'))
+				});
+				imageBlinking($img);
+			});
+		});
+	}
+	
+	var imgs = [];
+	for (var i = 0; i < 10; ++i) {
 		var xy = {};
 		while (xy.x === undefined) {
-			xy.x = Math.floor(Math.random() * ($(window).width() - cellSize) / cellSize);
-			xy.y = Math.floor(Math.random() * ($(window).height() - cellSize) / cellSize);
-			if (coords.xyInArray(xy)) 
+			xy.x = Math.floor(Math.random() * ($(document).width() - cellSize) / cellSize);
+			xy.y = Math.floor(Math.random() * ($(document).height() - cellSize) / cellSize);
+			var date = new Date();
+			if (coords.xyInArray(xy) != -1) 
 				xy = {};
 			else {
 				coords.push(xy);
-				var imgURL = ((1 - Math.random()) * Math.random() > 0.5) ? 'url(../img/cross.png)' : 'url(../img/circle.png)';
-				$('<div></div>').addClass('background').css({
+				var imgURL = (date.getMilliseconds() % 2 == 0) ? 'url(../img/cross.png)' : 'url(../img/circle.png)';
+				var $img = $('<div></div>').addClass('background').css({
 					left: cellSize * xy.x,
 					top: cellSize * xy.y,
 					width: cellSize,
 					height: cellSize,
 					'z-index': -1,
 					'background-image': imgURL
-				}).appendTo($('body'));
+				}).appendTo($('body')).hide();
+				imgs.push($img);
+				setTimeout(imageBlinking(imgs[imgs.length-1]), Math.random()*5000);
 			}
 		}
 	}
