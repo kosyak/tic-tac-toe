@@ -35,6 +35,21 @@ class GameStart(webapp.RequestHandler):
                                              'Set-Cookie', 
                                              'sign=%s; expires=Fri, 31-Dec-2020 23:59:59 GMT' \
                                              % ('O'))
+            my_name = cur_player_record.record_of_name
+            self.response.headers.add_header(
+                                             'Set-Cookie', 
+                                             'your name=%s; expires=Fri, 31-Dec-2020 23:59:59 GMT' \
+                                             % (my_name))
+            game_id = int(cur_player_record.record_of_game_id)
+            cur_game = cur_game = db.GqlQuery("SELECT * FROM GameRecord WHERE record_of_game_id =:1", game_id).get().unPack()
+            opponent_uid = cur_game.first_player_uid
+            opponent_name = db.GqlQuery("SELECT * FROM PlayerRecord " + 
+                "WHERE record_of_uid = :1", opponent_uid).get().record_of_name
+            self.response.headers.add_header(
+                                             'Set-Cookie', 
+                                             'opponent name=%s; expires=Fri, 31-Dec-2020 23:59:59 GMT' \
+                                             % (opponent_name))
+            
             self.response.out.write('OK')
             return
             
@@ -64,6 +79,21 @@ class GameStart(webapp.RequestHandler):
                                              'Set-Cookie', 
                                              'sign=%s; expires=Fri, 31-Dec-2020 23:59:59 GMT' \
                                              % ('X'))
+                    my_name = cur_player_record.record_of_name
+                    self.response.headers.add_header(
+                                                     'Set-Cookie', 
+                                                     'your name=%s; expires=Fri, 31-Dec-2020 23:59:59 GMT' \
+                                                     % (my_name))
+                    game_id = int(cur_player_record.record_of_game_id)
+                    cur_game = cur_game = db.GqlQuery("SELECT * FROM GameRecord WHERE record_of_game_id =:1", game_id).get().unPack()
+                    opponent_uid = cur_game.second_player_uid
+                    opponent_name = db.GqlQuery("SELECT * FROM PlayerRecord " + 
+                                                "WHERE record_of_uid = :1", opponent_uid).get().record_of_name
+                    self.response.headers.add_header(
+                                                     'Set-Cookie', 
+                                                     'opponent name=%s; expires=Fri, 31-Dec-2020 23:59:59 GMT' \
+                                                     % (opponent_name))
+            
                     self.response.out.write('OK')
                     #self.redirect('/game', True)
                     return

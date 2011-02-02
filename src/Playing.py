@@ -65,10 +65,9 @@ class Playing(webapp.RequestHandler):
             cur_game_record.put()
             self.response.out.write(cur_game.getPlayerGameStatus(player_position))
         elif mode == 'ask':
-            self.response.out.write(cur_game.getPlayerGameStatus(player_position))
+            self.response.out.write(cur_game.getPlayerGameStatus(player_position) + ' ')
         else:
-            self.response.out.write(cur_game.getPlayerGameStatus(player_position))
-            
+            pass
             
 
 

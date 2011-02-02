@@ -20,15 +20,14 @@ class GamePage(webapp.RequestHandler):
         'Set-Cookie', 
         'uid=%s; expires=Fri, 31-Dec-2020 23:59:59 GMT' \
           % (cur_player.uid))
+        
         #cur_game = db.GqlQuery("SELECT * FROM GameRecord WHERE record_of_game_id = :1", int(cur_player.game_id)).get().unPack()
                 
         #if cur_game.isFirstPlayer(cur_player.uid):
         #    sign = 'X'
         #else:
         #    sign = 'O'
-          
-        
-        
+                
         self.response.headers['Content-Type'] = 'text/plain'
         self.response.out.write('number ' + str(db.GqlQuery("SELECT * FROM PlayerRecord").count()))
         
