@@ -36,6 +36,7 @@ jQuery.switchStatus = function(oldStatus, message) {
 		}
 		$info.css('left', parseInt($('#gametable > table').css('left')) + $('#gametable > table').innerWidth()).fadeIn('fast');
 	});
+//	alert('status is '+newStatus);
 	return newStatus;
 }
 
@@ -63,8 +64,8 @@ $(document).ready(function() {
 	$.style_check = {'X' : 'cross', 'O' : 'circle'};
 	$.gameEnded = false;
 	$.curPlayerChecker = $.cookie('sign');
-	$.gameStatus = 'waiting';
-	$.opponentName=  $.cookie('opponent name');
+	$.gameStatus = '';
+	$.opponentName =  $.cookie('opponent name');
 	
 	/* Status checker */
 	var statusCheck = /*setInterval(*/ function(){
@@ -83,10 +84,10 @@ $(document).ready(function() {
 							.addClass($.style_check[item[0]]);
 					}
 				}
+				$.gameStatus = $.switchStatus($.gameStatus, data);
 				if($.gameStatus == 'waiting') {
 					setTimeout(statusCheck, 3000);
 				}
-				$.gameStatus = $.switchStatus($.gameStatus, data);
 			}
 		});
 	}
@@ -95,8 +96,8 @@ $(document).ready(function() {
 	
 	/* Get initial status */
    	$.post('gameprocess2', {mode: 'ask'}, function(data) {
-		if(!data) return;
 		$.gameStatus = $.switchStatus($.gameStatus, data);
+		if(!data) return;
 		if ($.gameStatus == 'waiting') {
 			//$.curPlayerChecker = 'O';
 			statusCheck();
@@ -117,15 +118,16 @@ $(document).ready(function() {
 	
 	/* Drop event */
 	$('td').bind( "drop", function(event, ui) {
+		var $td = $(this);
 		
-		if($.gameStatus != 'moving') return false;
-		
+		if($.gameStatus != 'moving' || $td.hasClass('cross') || $td.hasClass('circle') || $td.droppable( "option", "disabled" )) return false;
+		$td.droppable("option", "disabled", true); // Cell is used from now
+		$td.unbind('drop');
 		ui.helper.animate({
 			left: $(this).offset().left,
 			top: $(this).offset().top
 		}, 300);
 		
-		var $td = $(this);
 		if($.gameEnded) {
 			$(this).unbind('drop');
 			return false;
@@ -140,7 +142,10 @@ $(document).ready(function() {
 				return false;
 			}
 			else {
-				ui.helper.draggable("option", "disabled", true); // Check is used from now
+//				$td.removeClass('droppable');
+//				$td.droppable("option", "disabled", true); // Cell is used from now
+				ui.helper.draggable("option", "disabled", true); // Check is used from now - line with the same logic is located upper <- FIX
+				ui.helper.css('z-index', 1);
 				$.gameStatus = $.switchStatus($.gameStatus, data);
 				if (data.search(/(moving)|(waiting)/) != -1) {
 					statusCheck();
