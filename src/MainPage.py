@@ -14,6 +14,7 @@ class MainPage(webapp.RequestHandler):
 #          </form>
 #        </body>
 #      </html>""")
+        
         self.response.headers['Content-Type'] = 'text/html'
         path = os.path.join(os.path.dirname(__file__), 'html/main.html')
         self.response.out.write(template.render(path, {}))

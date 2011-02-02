@@ -31,6 +31,10 @@ class GameStart(webapp.RequestHandler):
         
         if cur_player_record.record_of_game_id:
             #cur_player_record.delete()
+            self.response.headers.add_header(
+                                             'Set-Cookie', 
+                                             'sign=%s; expires=Fri, 31-Dec-2020 23:59:59 GMT' \
+                                             % ('O'))
             self.response.out.write('OK')
             return
             
@@ -56,6 +60,10 @@ class GameStart(webapp.RequestHandler):
                     player.put()
                     #cur_query[0].delete()
                     #cur_query[0].delete()
+                    self.response.headers.add_header(
+                                             'Set-Cookie', 
+                                             'sign=%s; expires=Fri, 31-Dec-2020 23:59:59 GMT' \
+                                             % ('X'))
                     self.response.out.write('OK')
                     #self.redirect('/game', True)
                     return

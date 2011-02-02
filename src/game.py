@@ -81,6 +81,7 @@ class GameInstanse:
                 "Winning string " + str(self.winning_string) + "\n" + 
                 "Last move " + str(self.last_move) + "\n" +
                 "Number of moves " + str(self.number_of_turns) + "\n" +
+                "Board now :\n " + str(self.getShowBoardString()) +  
                 "First player status " + str(self.getFirstPlayerGameStatus()) + "\n" +
                 "Second player status " + str(self.getSecondPlayerGameStatus()) + "\n"
                 )
@@ -93,6 +94,7 @@ class GameInstanse:
                 "Game is ended " + str(self.is_ended) + "<br>" + 
                 "Winning string " + str(self.winning_string) + "<br>" + 
                 "Last move " + str(self.last_move) + "<br>" +
+                "Board now :<br> " + (str(self.getShowBoardString())).replace("\n", "<br>") +
                 "Number of moves " + str(self.number_of_turns) + "<br>" +
                 "First player status " + str(self.getFirstPlayerGameStatus()) + "<br>" +
                 "Second player status " + str(self.getSecondPlayerGameStatus()) + "<br>"
@@ -107,10 +109,14 @@ class GameInstanse:
                     if (x + dx >= 0 and y + dy >= 0 and x - dx >= 0 and y - dy >= 0 and 
                         x + dx < SIZE_OF_BOARD and y + dy < SIZE_OF_BOARD and
                         x - dx < SIZE_OF_BOARD and y - dy < SIZE_OF_BOARD and
-                        self.board[x][y] == self.board[x + dx][y + dy] == self.board[x - dx][y - dy] and self.board[x][y] != None):
+                        x - 2 * dx < SIZE_OF_BOARD and y - 2 * dy < SIZE_OF_BOARD and
+                        self.board[x][y] == self.board[x + dx][y + dy] == 
+                            self.board[x - dx][y - dy] == self.board[x - 2 * dx][y - 2 * dy] and
+                        self.board[x][y] != None):
                         self.winning_string = (str(x) + ' ' + str(y) + ' ' +
                                               str(x + dx) + ' ' + str(y + dy) + ' ' + 
-                                              str(x - dx) + ' ' + str(y - dy))
+                                              str(x - dx) + ' ' + str(y - dy) + ' ' +
+                                              str(x - 2 * dx) + ' ' + str(y - 2 * dy) + ' ')
                         self.is_ended = True
                         return True
         return False
@@ -124,7 +130,21 @@ class GameInstanse:
         if len(board_string) > 0 and board_string[-1] == ',':
             board_string = board_string[:-1]
         return board_string
-                    
+    
+    def getShowBoardString(self):
+        result = ""
+        for i in range(0, len(self.board)):
+            line = ""
+            for j in range(0, len(self.board[i])):
+                if self.board[i][j] == None:
+                    line = line + "_"
+                elif self.board[i][j] == 1:
+                    line = line + 'O'
+                else:
+                    line = line + 'X'
+            result = result + line + "\n"  
+        return result
+
     def makeMove(self, x, y):
         if self.board[x][y] != None:
             return False
