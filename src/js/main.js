@@ -55,7 +55,8 @@ $(document).ready(function() {
 					'background-image': imgURL
 				}).appendTo($('body')).hide();
 				imgs.push($img);
-				setTimeout(imageBlinking(imgs[imgs.length-1]), Math.random()*5000);
+				/*setTimeout(imageBlinking(imgs[imgs.length-1]), Math.random()*5000);*/
+				imageBlinking(imgs[imgs.length-1]);
 			}
 		}
 	}

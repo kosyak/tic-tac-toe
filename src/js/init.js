@@ -61,10 +61,7 @@ $(document).ready(function() {
 	} 
 	
 	var infoLoop = function() {
-		$('#info').css({
-			left: parseInt($('#gametable > table').css('left')) + $('#gametable > table').innerWidth()
-		});
-		var tt = $('#info').outerWidth();
+		$('#info').css('left', parseInt($('#gametable > table').css('left')) + $('#gametable > table').innerWidth());
 		$('#info').animate({
 			left: 0//parseInt($('#gametable > table').css('left'))-$('#info').textWidth()
 		}, {

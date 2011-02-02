@@ -28,13 +28,13 @@ jQuery.switchStatus = function(oldStatus, message) {
 				$.setWinCells(message.slice(message.search(/ /)+1));
 				break;
 			case 'waiting':
-				$info.text("Waiting for...");
+				$info.text("Waiting for " + $.opponentName);
 				break;
 			case 'opponent_offline':
 				$info.text("Opponent is offline");
 				break;
 		}
-		$info.fadeIn('fast');
+		$info.css('left', parseInt($('#gametable > table').css('left')) + $('#gametable > table').innerWidth()).fadeIn('fast');
 	});
 	return newStatus;
 }
@@ -64,6 +64,7 @@ $(document).ready(function() {
 	$.gameEnded = false;
 	$.curPlayerChecker = $.cookie('sign');
 	$.gameStatus = 'waiting';
+	$.opponentName=  $.cookie('opponent name');
 	
 	/* Status checker */
 	var statusCheck = /*setInterval(*/ function(){
@@ -96,13 +97,10 @@ $(document).ready(function() {
    	$.post('gameprocess2', {mode: 'ask'}, function(data) {
 		if(!data) return;
 		$.gameStatus = $.switchStatus($.gameStatus, data);
-		if ($.gameStatus == 'moving') {}
-			//$.curPlayerChecker = 'X';
-		else 
-			if ($.gameStatus == 'waiting') {
-				//$.curPlayerChecker = 'O';
-				statusCheck();
-			}
+		if ($.gameStatus == 'waiting') {
+			//$.curPlayerChecker = 'O';
+			statusCheck();
+		}
 		var $draggable = $('div:not(#error):hidden'); 
 //		while($.curPlayerChecker == '') {}
 		$draggable.addClass($.style_check[$.curPlayerChecker]).fadeIn('slow');
