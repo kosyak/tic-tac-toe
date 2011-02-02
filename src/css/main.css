@@ -60,3 +60,12 @@ input {
   padding: 3px;  
 }
 
+.background {
+	background-position:center;
+	position: absolute;
+	/*background: url(../img/cross.png) no-repeat; */
+	background-repeat:no-repeat;
+	filter:alpha(opacity=0.2);
+	opacity: 0.2;
+	
+}

@@ -54,6 +54,7 @@ jQuery.setWinCells = function(data) {
 	for (var i = 0; i < data.length / 2; ++i) {
 		$this = $('#gametable > table > tbody > tr:eq(' + (parseInt(data[2 * i + 1])) + ') > td:eq(' + (parseInt(data[2 * i])) + ')');
 		$this.addClass(win_style).animate({'background-color': '#c8ff32'}, 1500);
+		$this.unbind('hover');
 	}
 }
 
@@ -61,7 +62,7 @@ $(document).ready(function() {
 	// Dirty sexy globals
 	$.style_check = {'X' : 'cross', 'O' : 'circle'};
 	$.gameEnded = false;
-	$.curPlayerChecker = '';
+	$.curPlayerChecker = $.cookie('sign');
 	$.gameStatus = 'waiting';
 	
 	/* Status checker */
@@ -95,14 +96,15 @@ $(document).ready(function() {
    	$.post('gameprocess2', {mode: 'ask'}, function(data) {
 		if(!data) return;
 		$.gameStatus = $.switchStatus($.gameStatus, data);
-		if ($.gameStatus == 'moving') 
-			$.curPlayerChecker = 'X';
+		if ($.gameStatus == 'moving') {}
+			//$.curPlayerChecker = 'X';
 		else 
 			if ($.gameStatus == 'waiting') {
-				$.curPlayerChecker = 'O';
+				//$.curPlayerChecker = 'O';
 				statusCheck();
 			}
 		var $draggable = $('div:not(#error):hidden'); 
+//		while($.curPlayerChecker == '') {}
 		$draggable.addClass($.style_check[$.curPlayerChecker]).fadeIn('slow');
 	});	
 	/* /Get initial status */

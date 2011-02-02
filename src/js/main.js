@@ -1,4 +1,36 @@
+Array.prototype.xyInArray = function(elem) {
+	for (var i = 0; i < this.length; ++i) {
+		if (this[i].x == elem.x && this[i].y == elem.y) 
+			return true;
+	}
+	return false;
+}
+
 $(document).ready(function() {
+	var coords = [];
+	var cellSize = 150;
+	for (var i = 0; i < 5; ++i) {
+		var xy = {};
+		while (xy.x === undefined) {
+			xy.x = Math.floor(Math.random() * ($(window).width() - cellSize) / cellSize);
+			xy.y = Math.floor(Math.random() * ($(window).height() - cellSize) / cellSize);
+			if (coords.xyInArray(xy)) 
+				xy = {};
+			else {
+				coords.push(xy);
+				var imgURL = ((1 - Math.random()) * Math.random() > 0.5) ? 'url(../img/cross.png)' : 'url(../img/circle.png)';
+				$('<div></div>').addClass('background').css({
+					left: cellSize * xy.x,
+					top: cellSize * xy.y,
+					width: cellSize,
+					height: cellSize,
+					'z-index': -1,
+					'background-image': imgURL
+				}).appendTo($('body'));
+			}
+		}
+	}
+	
   var $paddingX = $(window).width();
   var $paddingY = $(window).height();
   var formWidth = 0;
