@@ -9,22 +9,23 @@ $.fn.textWidth = function(){ // Not needed
 	return width;
 }
 
-jQuery.switchStatus = function(oldStatus, newStatus) {
-	newStatus = newStatus.split(' ')[0];
+jQuery.switchStatus = function(oldStatus, message) {
+	if(message instanceof Array) message = message.join();
+	var newStatus = message.split(' ')[0];
 	if(oldStatus == newStatus) return oldStatus;
 	var $info = $('#info');
 	$info.fadeOut('fast', function() {
 		switch (newStatus) {
 			case 'lose':
 				$info.text('You lose');
-				$.setWinCells(newStatus);
+				$.setWinCells(message.slice(message.search(/ /)+1));
 				break;
 			case 'moving':
 				$info.text('Your turn');
 				break;
 			case 'win':
 				$info.text('You win');
-				$.setWinCells(newStatus);
+				$.setWinCells(message.slice(message.search(/ /)+1));
 				break;
 			case 'waiting':
 				$info.text("Waiting for...");
@@ -38,31 +39,52 @@ jQuery.switchStatus = function(oldStatus, newStatus) {
 	return newStatus;
 }
 
+jQuery.setWinCells = function(data) {
+	var win_style; // Very dirty
+	if($.gameStatus == 'win') {
+		win_style = $.style_check[$.curPlayerChecker];
+	} else {
+		($.curPlayerChecker == 'X') ? win_style = $.style_check['O'] : win_style = $.style_check['X'];
+	}
+	
+	data = data.split(' ');
+	while (data.length > 0 && isNaN(parseInt(data[0]))) 
+	data.splice(0, 1);
+	var $this;
+	for (var i = 0; i < data.length / 2; ++i) {
+		$this = $('#gametable > table > tbody > tr:eq(' + (parseInt(data[2 * i + 1])) + ') > td:eq(' + (parseInt(data[2 * i])) + ')');
+		$this.addClass(win_style).css('background-color', 'gray');
+	}
+}
+
 $(document).ready(function() {
-	var style_check = {'X' : 'cross', 'O' : 'circle'};
-	var gameEnded = false;
-	var curPlayerChecker = '';
-	var gameStatus = 'no_status';
-	var hasRepainted = false;
+	// Dirty sexy globals
+	$.style_check = {'X' : 'cross', 'O' : 'circle'};
+	$.gameEnded = false;
+	$.curPlayerChecker = '';
+	$.gameStatus = 'waiting';
 	
 	/* Status checker */
 	var statusCheck = /*setInterval(*/ function(){
-		if (gameStatus != 'waiting') 
+		if ($.gameStatus != 'waiting') 
 			return;
 		$.post('gameprocess2', {
 			mode: 'ask'
 		}, function(data){
 			if (data) {
-				gameStatus = $.switchStatus(gameStatus, data);
-				hasRepainted = true;
-				a = data.split(' ');
-				var a = data.split(' ');
-				var $this;
-				$this = $('#gametable > table > tbody > tr:eq(' + (parseInt(a[2])) + ') > td:eq(' + (parseInt(a[1])) + ')');
-				$this.addClass(style_check[a[0]]);
-				if(gameStatus == 'waiting') {
+				var coords = data.slice(data.search(/ /)+1).split(',');
+				for (var i=0; i<coords.length; ++i) {
+					var item = coords[i];
+					item = item.split(' ');
+					if ($.curPlayerChecker != item[0]) {
+						$('#gametable > table > tbody > tr:eq(' + (parseInt(item[2])) + ') > td:eq(' + (parseInt(item[1])) + ')')
+							.addClass($.style_check[item[0]]);
+					}
+				}
+				if($.gameStatus == 'waiting') {
 					setTimeout(statusCheck, 3000);
 				}
+				$.gameStatus = $.switchStatus($.gameStatus, data);
 			}
 		});
 	}
@@ -72,16 +94,16 @@ $(document).ready(function() {
 	/* Get initial status */
    	$.post('gameprocess2', {mode: 'ask'}, function(data) {
 		if(!data) return;
-		gameStatus = $.switchStatus(gameStatus, data);
-		if (gameStatus == 'moving') 
-			curPlayerChecker = 'X';
+		$.gameStatus = $.switchStatus($.gameStatus, data);
+		if ($.gameStatus == 'moving') 
+			$.curPlayerChecker = 'X';
 		else 
-			if (gameStatus == 'waiting') {
-				curPlayerChecker = 'O';
+			if ($.gameStatus == 'waiting') {
+				$.curPlayerChecker = 'O';
 				statusCheck();
 			}
 		var $draggable = $('div:not(#error):hidden'); 
-		$draggable.addClass(style_check[curPlayerChecker]).fadeIn('slow');
+		$draggable.addClass($.style_check[$.curPlayerChecker]).fadeIn('slow');
 	});	
 	/* /Get initial status */
 	
@@ -94,7 +116,7 @@ $(document).ready(function() {
 	/* Drop event */
 	$('td').bind( "drop", function(event, ui) {
 		
-		if(gameStatus != 'moving') return false;
+		if($.gameStatus != 'moving') return false;
 		
 		ui.helper.animate({
 			left: $(this).offset().left,
@@ -102,7 +124,7 @@ $(document).ready(function() {
 		}, 300);
 		
 		var $td = $(this);
-		if(gameEnded) {
+		if($.gameEnded) {
 			$(this).unbind('drop');
 			return false;
 		}
@@ -117,28 +139,15 @@ $(document).ready(function() {
 			}
 			else {
 				ui.helper.draggable("option", "disabled", true); // Check is used from now
-				gameStatus = $.switchStatus(gameStatus, 'waiting'); // Definitely 'waiting' now
+				$.gameStatus = $.switchStatus($.gameStatus, 'waiting'); // Definitely 'waiting' now
 				//data.search(/X/) != -1) ? $td.addClass(style_check['X']) : $td.addClass(style_check['O']);
 				if (data.search(/(moving)|(waiting)/) != -1) {
 					statusCheck();
 				}
 				else { // Game is ended (TODO: 'opponent offline' case)
-					gameEnded = true;
-					data = data.split(' '); // setWinCells() function
-					while (data.length > 0 && isNaN(parseInt(data[0]))) 
-						data.splice(0, 1);
-					var $this;
-					for (var i = 0; i < data.length / 2; ++i) {
-						$this = $('#gametable > table > tbody > tr:eq(' + (parseInt(data[2 * i + 1])) + ') > td:eq(' + (parseInt(data[2 * i])) + ')');
-						$this.css('background-color', 'blue');
-					}
+					$.gameEnded = true;
+					$.gameStatus = $.switchStatus($.gameStatus, data); 
 				}
-				
-/*		    	$.post('gameprocess2', {mode: 'waiting'}, function(data) {  //  setMode() function
-					gameStatus = $.switchStatus(gameStatus, data); 
-				}); */
-				
-				hasRepainted = false;
 			}
 		});
 	});
