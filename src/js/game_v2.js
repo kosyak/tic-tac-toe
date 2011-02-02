@@ -53,7 +53,7 @@ jQuery.setWinCells = function(data) {
 	var $this;
 	for (var i = 0; i < data.length / 2; ++i) {
 		$this = $('#gametable > table > tbody > tr:eq(' + (parseInt(data[2 * i + 1])) + ') > td:eq(' + (parseInt(data[2 * i])) + ')');
-		$this.addClass(win_style).css('background-color', 'gray');
+		$this.addClass(win_style).animate({'background-color': '#c8ff32'}, 1500);
 	}
 }
 
@@ -108,9 +108,11 @@ $(document).ready(function() {
 	/* /Get initial status */
 	
 	$('td').hover(function () {
-		$(this).css('background-color', 'white')
+		if(!$.gameEnded)
+			$(this).css('background-color', 'white')
 	}, function() {
-		$(this).css('background-color', 'yellow');
+		if(!$.gameEnded)
+			$(this).css('background-color', 'yellow');
 	});
 	
 	/* Drop event */
@@ -139,14 +141,13 @@ $(document).ready(function() {
 			}
 			else {
 				ui.helper.draggable("option", "disabled", true); // Check is used from now
-				$.gameStatus = $.switchStatus($.gameStatus, 'waiting'); // Definitely 'waiting' now
-				//data.search(/X/) != -1) ? $td.addClass(style_check['X']) : $td.addClass(style_check['O']);
+				$.gameStatus = $.switchStatus($.gameStatus, data);
 				if (data.search(/(moving)|(waiting)/) != -1) {
 					statusCheck();
 				}
 				else { // Game is ended (TODO: 'opponent offline' case)
 					$.gameEnded = true;
-					$.gameStatus = $.switchStatus($.gameStatus, data); 
+//					$.gameStatus = $.switchStatus($.gameStatus, data); 
 				}
 			}
 		});
