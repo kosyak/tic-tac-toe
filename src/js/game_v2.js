@@ -148,7 +148,26 @@ $(document).ready(function() {
 				ui.helper.css('z-index', 1);
 				$.gameStatus = $.switchStatus($.gameStatus, data);
 				if (data.search(/(moving)|(waiting)/) != -1) {
-					statusCheck();
+//					statusCheck();
+					$.post('gameprocess2', {  // modified statusCheck()
+						mode: 'waiting'
+						}, function(data){
+							if (data) {
+								var coords = data.slice(data.search(/ /)+1).split(',');
+								for (var i=0; i<coords.length; ++i) {
+									var item = coords[i];
+									item = item.split(' ');
+									if ($.curPlayerChecker != item[0]) {
+										$('#gametable > table > tbody > tr:eq(' + (parseInt(item[2])) + ') > td:eq(' + (parseInt(item[1])) + ')')
+											.addClass($.style_check[item[0]]);
+									}
+								}
+								$.gameStatus = $.switchStatus($.gameStatus, data);
+								if($.gameStatus == 'waiting') {
+									setTimeout(statusCheck, 3000);
+								}
+							}
+						});
 				}
 				else { // Game is ended (TODO: 'opponent offline' case)
 					$.gameEnded = true;
