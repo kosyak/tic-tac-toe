@@ -30,4 +30,6 @@ playing.py - делает все:
   for example: boardstring = "X 0 0,O 0 2,O 1 1,X 2 0,O 2 2,X 3 4"  
            
  Иток, playing заменяет GameStatus, GameProcess, GameRepaint
-             
+
+[Test]
+Тестируем Cloud9...
